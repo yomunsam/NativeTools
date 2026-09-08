@@ -5,7 +5,7 @@
     android:layout_height="20dp"
     tools:viewBindingIgnore="true">
 
-    <com.dede.nativetools.ui.AndroidView
+    <app.yomu.netbar.ui.AndroidView
         android:id="@+id/iv_logo"
         android:layout_width="28dp"
         android:layout_height="28dp"

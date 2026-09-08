@@ -1,0 +1,18 @@
+package app.yomu.netbar.netspeed.stats
+
+import android.net.TrafficStats
+
+class NormalNetStats : NetStats {
+
+    override fun supported(): Boolean {
+        return true
+    }
+
+    override fun getRxBytes(): Long {
+        return TrafficStats.getTotalRxBytes()
+    }
+
+    override fun getTxBytes(): Long {
+        return TrafficStats.getTotalTxBytes()
+    }
+}

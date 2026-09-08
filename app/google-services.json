@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:513583875188:android:fad4a95b9510566a4f7d21",
         "android_client_info": {
-          "package_name": "com.dede.nativetools"
+          "package_name": "app.yomu.netbar"
         }
       },
       "oauth_client": [

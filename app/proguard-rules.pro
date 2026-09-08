@@ -23,7 +23,7 @@
 
 -printconfiguration ./build/full-r8-config.txt
 
--keep public class * extends com.dede.nativetools.netspeed.stats.NetStats {
+-keep public class * extends app.yomu.netbar.netspeed.stats.NetStats {
    public <init>();
 }
 
@@ -40,7 +40,7 @@
 -keepnames class * extends kotlinx.coroutines.internal.MainDispatcherFactory
 -keepnames class * extends kotlinx.coroutines.CoroutineExceptionHandler
 
--keep class com.dede.nativetools.network.Api {*;}
+-keep class app.yomu.netbar.network.Api {*;}
 
 # OkHttp
 -dontwarn org.conscrypt.**

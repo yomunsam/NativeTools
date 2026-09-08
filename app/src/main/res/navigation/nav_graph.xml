@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/netSpeed"
-        android:name="com.dede.nativetools.netspeed.NetSpeedFragment"
+        android:name="app.yomu.netbar.netspeed.NetSpeedFragment"
         android:label="@string/label_net_speed">
         <action
             android:id="@+id/action_netSpeed_to_netSpeedAdvanced"
@@ -20,7 +20,7 @@
 
     <fragment
         android:id="@+id/about"
-        android:name="com.dede.nativetools.about.AboutFragment"
+        android:name="app.yomu.netbar.about.AboutFragment"
         android:label="@string/label_about"
         tools:layout="@layout/fragment_about">
         <deepLink app:uri="https://dede.nativetools/about" />
@@ -38,7 +38,7 @@
 
     <dialog
         android:id="@+id/dialogDonate"
-        android:name="com.dede.nativetools.donate.DonateDialogFragment"
+        android:name="app.yomu.netbar.donate.DonateDialogFragment"
         android:label="@string/action_donate"
         tools:layout="@layout/fragment_bottom_sheet_list">
         <action
@@ -48,12 +48,12 @@
 
     <dialog
         android:id="@+id/dialogDonateList"
-        android:name="com.dede.nativetools.donate.DonateListFragment"
+        android:name="app.yomu.netbar.donate.DonateListFragment"
         android:label="@string/label_donate_list" />
 
     <fragment
         android:id="@+id/other"
-        android:name="com.dede.nativetools.other.OtherFragment"
+        android:name="app.yomu.netbar.other.OtherFragment"
         android:label="@string/label_other">
         <action
             android:id="@+id/action_other_to_about"
@@ -72,27 +72,27 @@
 
     <fragment
         android:id="@+id/netSpeedAdvanced"
-        android:name="com.dede.nativetools.netspeed.NetSpeedAdvancedFragment"
+        android:name="app.yomu.netbar.netspeed.NetSpeedAdvancedFragment"
         android:label="@string/label_net_speed_advanced" />
 
     <fragment
         android:id="@+id/diagnosisFragment"
-        android:name="com.dede.nativetools.diagnosis.DiagnosisFragment"
+        android:name="app.yomu.netbar.diagnosis.DiagnosisFragment"
         android:label="@string/label_diagnosis"
         tools:layout="@layout/fragment_diagnosis" />
 
     <fragment
         android:id="@+id/netUsageConfigFragment"
-        android:name="com.dede.nativetools.netusage.NetUsageConfigFragment"
+        android:name="app.yomu.netbar.netusage.NetUsageConfigFragment"
         android:label="@string/label_net_usage_config" />
 
     <dialog
         android:id="@+id/dialogGuide"
-        android:name="com.dede.nativetools.main.GuideDialogFragment"
+        android:name="app.yomu.netbar.main.GuideDialogFragment"
         android:label="@string/label_privacy_agreement" />
 
     <dialog
         android:id="@+id/dialogBeta"
-        android:name="com.dede.nativetools.beta.BetaFragment"
+        android:name="app.yomu.netbar.beta.BetaFragment"
         tools:layout="@layout/fragment_bottom_sheet_list" />
 </navigation>

@@ -21,7 +21,7 @@
             app:summary="@string/summary_ignore_battery_optimize"
             app:title="@string/label_ignore_battery_optimize" />
 
-        <com.dede.nativetools.ui.NightModeDropDownPreference
+        <app.yomu.netbar.ui.NightModeDropDownPreference
             app:defaultValue="-1"
             app:entries="@array/night_mode_toggle"
             app:entryValues="@array/night_mode_toggle_value"
@@ -30,7 +30,7 @@
             app:title="@string/label_night_mode"
             app:useSimpleSummaryProvider="true" />
 
-        <com.dede.nativetools.ui.NavigatePreference
+        <app.yomu.netbar.ui.NavigatePreference
             app:enableCopying="true"
             app:icon="@drawable/ic_outline_info"
             app:key="about"
@@ -38,7 +38,7 @@
             app:summary="@string/summary_about_version"
             app:title="@string/label_about" />
 
-        <com.dede.nativetools.ui.NavigatePreference
+        <app.yomu.netbar.ui.NavigatePreference
             app:allowDividerAbove="true"
             app:eventName="捐赠"
             app:icon="@drawable/ic_volunteer_activism"
@@ -59,7 +59,7 @@
             app:summary="@string/summary_share_app"
             app:title="@string/action_share" />
 
-        <com.dede.nativetools.ui.NavigatePreference
+        <app.yomu.netbar.ui.NavigatePreference
             app:eventName="@string/action_beta"
             app:icon="@drawable/ic_android_13_hero"
             app:navigateId="@id/action_other_to_dialogBeta"

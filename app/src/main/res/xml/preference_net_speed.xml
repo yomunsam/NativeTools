@@ -36,7 +36,7 @@
             app:useSimpleSummaryProvider="true" />
 
 
-        <com.dede.nativetools.ui.MaterialEditTextPreference
+        <app.yomu.netbar.ui.MaterialEditTextPreference
             android:inputType="number"
             app:defaultValue="0"
             app:dialogMessage="@string/alert_msg_hide_threshold"
@@ -45,7 +45,7 @@
             app:title="@string/label_net_speed_hide_threshold"
             tools:useSimpleSummaryProvider="true" />
 
-        <com.dede.nativetools.ui.NavigatePreference
+        <app.yomu.netbar.ui.NavigatePreference
             app:eventName="高级设置"
             app:icon="@drawable/ic_outline_settings"
             app:navigateId="@id/action_netSpeed_to_netSpeedAdvanced"
@@ -59,7 +59,7 @@
         app:key="key_notification"
         app:title="@string/label_notification">
 
-        <com.dede.nativetools.ui.CustomWidgetLayoutSwitchPreference
+        <app.yomu.netbar.ui.CustomWidgetLayoutSwitchPreference
             app:defaultValue="false"
             app:icon="@drawable/ic_outline_data_usage"
             app:key="net_speed_usage"
@@ -67,7 +67,7 @@
             app:title="@string/label_net_speed_usage"
             app:widgetLayout="@layout/override_preference_widget_switch_compat" />
 
-        <com.dede.nativetools.ui.CustomWidgetLayoutSwitchPreference
+        <app.yomu.netbar.ui.CustomWidgetLayoutSwitchPreference
             android:key="net_speed_locked_hide"
             android:title="@string/label_net_speed_hide_lock_notification"
             app:defaultValue="true"
@@ -91,5 +91,5 @@
 
     </PreferenceCategory>
 
-    <com.dede.nativetools.ui.FooterPreference />
+    <app.yomu.netbar.ui.FooterPreference />
 </PreferenceScreen>

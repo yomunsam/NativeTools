@@ -23,14 +23,15 @@ plugins {
 apply(from = "../gradle/spotless.gradle")
 
 android {
+    namespace = "app.yomu.netbar"
     compileSdk = 34
     buildToolsVersion = "34.0.0"
     defaultConfig {
-        applicationId = "com.dede.nativetools"
+        applicationId = "app.yomu.netbar"
         minSdk = 23
         targetSdk = 34
-        versionCode = 65
-        versionName = "4.1.0"
+        versionCode = 66
+        versionName = "4.1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         resourceConfigurations.addAll(

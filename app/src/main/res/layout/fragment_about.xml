@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.dede.nativetools.ui.LogoImageView
+    <app.yomu.netbar.ui.LogoImageView
         android:id="@+id/iv_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -56,7 +56,7 @@
         app:layout_constraintTop_toBottomOf="@id/tv_app_name"
         tools:text="@string/summary_about_version" />
 
-    <com.dede.nativetools.ui.LogoImageView
+    <app.yomu.netbar.ui.LogoImageView
         android:id="@+id/iv_github"
         android:layout_width="30dp"
         android:layout_height="30dp"

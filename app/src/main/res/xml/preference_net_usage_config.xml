@@ -24,7 +24,7 @@
 
     </PreferenceCategory>
 
-    <com.dede.nativetools.ui.MaterialEditTextPreference
+    <app.yomu.netbar.ui.MaterialEditTextPreference
         android:inputType="text"
         app:allowDividerAbove="true"
         app:dependency="key_net_usage_mobile"

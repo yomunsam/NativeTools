@@ -7,7 +7,7 @@
         app:iconSpaceReserved="false"
         app:title="@string/label_net_speed_advanced">
 
-        <com.dede.nativetools.netspeed.typeface.FontDropDownPreference
+        <app.yomu.netbar.netspeed.typeface.FontDropDownPreference
             android:key="net_speed_font"
             app:defaultValue="Normal"
             app:entries="@array/net_speed_font"
@@ -16,7 +16,7 @@
             app:title="@string/label_net_speed_font"
             app:useSimpleSummaryProvider="true" />
 
-        <com.dede.nativetools.ui.TypefaceDropDownPreference
+        <app.yomu.netbar.ui.TypefaceDropDownPreference
             android:title="@string/label_net_speed_style"
             app:defaultValue="1"
             app:entries="@array/net_speed_text_style"
@@ -34,7 +34,7 @@
             app:title="@string/label_net_speed_mode"
             app:useSimpleSummaryProvider="true" />
 
-        <com.dede.nativetools.ui.SliderPreference
+        <app.yomu.netbar.ui.SliderPreference
             android:stepSize="0.01"
             android:valueFrom="-0.5"
             android:valueTo="0.5"
@@ -43,7 +43,7 @@
             app:key="net_speed_vertical_offset"
             app:title="@string/label_net_speed_y_offset" />
 
-        <com.dede.nativetools.ui.SliderPreference
+        <app.yomu.netbar.ui.SliderPreference
             android:stepSize="0.01"
             android:valueFrom="0"
             android:valueTo="1"
@@ -52,7 +52,7 @@
             app:key="net_speed_relative_ratio"
             app:title="@string/label_net_speed_relative_ratio" />
 
-        <com.dede.nativetools.ui.SliderPreference
+        <app.yomu.netbar.ui.SliderPreference
             android:stepSize="0.01"
             android:valueFrom="-0.5"
             android:valueTo="0.5"
@@ -61,7 +61,7 @@
             app:key="net_speed_relative_distance"
             app:title="@string/label_net_speed_relative_distance" />
 
-        <com.dede.nativetools.ui.SliderPreference
+        <app.yomu.netbar.ui.SliderPreference
             android:stepSize="0.01"
             android:valueFrom="0.5"
             android:valueTo="1.5"
@@ -70,7 +70,7 @@
             app:key="net_speed_text_scale"
             app:title="@string/label_net_speed_text_scale" />
 
-        <com.dede.nativetools.ui.SliderPreference
+        <app.yomu.netbar.ui.SliderPreference
             android:stepSize="0.01"
             android:valueFrom="-0.5"
             android:valueTo="0.5"
@@ -79,7 +79,7 @@
             app:key="net_speed_horizontal_offset"
             app:title="@string/label_net_speed_x_offset" />
 
-        <com.dede.nativetools.ui.SliderPreference
+        <app.yomu.netbar.ui.SliderPreference
             android:stepSize="0.01"
             android:valueFrom="0.2"
             android:valueTo="1.3"
