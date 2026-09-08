@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.os.HandlerCompat
@@ -172,8 +173,13 @@ class NetSpeedService : Service(), Runnable {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        @Suppress("DEPRECATION")
-        val configuration = intent?.getParcelableExtra<NetSpeedConfiguration>(EXTRA_CONFIGURATION)
+        val configuration =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent?.getParcelableExtra(EXTRA_CONFIGURATION, NetSpeedConfiguration::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent?.getParcelableExtra(EXTRA_CONFIGURATION)
+            }
         updateConfiguration(configuration)
         // https://developer.android.google.cn/guide/components/services#CreatingAService
         // https://developer.android.google.cn/reference/android/app/Service#START_REDELIVER_INTENT
@@ -183,8 +189,12 @@ class NetSpeedService : Service(), Runnable {
     override fun onDestroy() {
         lifecycleJob.cancel()
         netSpeedCompute.destroy()
-        @Suppress("DEPRECATION")
-        stopForeground(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
         notificationManager.cancel(NetSpeedNotificationHelper.NOTIFICATION_ID)
         broadcastHelper.unregister(this)
         super.onDestroy()

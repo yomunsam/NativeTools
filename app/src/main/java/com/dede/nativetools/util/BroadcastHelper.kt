@@ -3,6 +3,7 @@ package com.dede.nativetools.util
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 
 typealias OnReceiver = (action: String?, intent: Intent?) -> Unit
 
@@ -25,7 +26,17 @@ class BroadcastHelper(private vararg val actions: String) {
                 }
             }
         val intentFilter = IntentFilter(*actions)
-        context.registerReceiver(broadcastReceiver, intentFilter)
+        // Android 13+: Context-registered receivers must declare export behaviour.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(
+                broadcastReceiver,
+                intentFilter,
+                Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            context.registerReceiver(broadcastReceiver, intentFilter)
+        }
         this.broadcastReceiver = broadcastReceiver
     }
 

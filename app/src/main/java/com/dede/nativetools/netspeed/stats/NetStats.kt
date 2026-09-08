@@ -2,6 +2,8 @@ package com.dede.nativetools.netspeed.stats
 
 import android.net.TrafficStats
 import android.util.Log
+import java.net.NetworkInterface
+import java.util.Collections
 import com.google.firebase.perf.metrics.AddTrace
 
 interface NetStats {
@@ -22,6 +24,55 @@ interface NetStats {
                 allStat += if (stat.isSupported) stat else 0
             }
             return allStat
+        }
+
+
+        /** Prefer live wlan* ifaces; fall back to common names when enumeration fails. */
+        fun wifiIfaceCandidates(): List<String> {
+            val found = linkedSetOf<String>()
+            try {
+                val en = NetworkInterface.getNetworkInterfaces()
+                if (en != null) {
+                    for (nif in Collections.list(en)) {
+                        val name = nif.name ?: continue
+                        if (name.startsWith("wlan")) {
+                            found.add(name)
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+            }
+            if (found.isEmpty()) {
+                found.add(WLAN_IFACE)
+                found.add("wlan1")
+            }
+            return found.toList()
+        }
+
+        fun rxBytesForWifiIfaces(): Long {
+            var total = 0L
+            var any = false
+            for (iface in wifiIfaceCandidates()) {
+                val v = TrafficStats.getRxBytes(iface)
+                if (v.isSupported) {
+                    total += v
+                    any = true
+                }
+            }
+            return if (any) total else UNSUPPORTED
+        }
+
+        fun txBytesForWifiIfaces(): Long {
+            var total = 0L
+            var any = false
+            for (iface in wifiIfaceCandidates()) {
+                val v = TrafficStats.getTxBytes(iface)
+                if (v.isSupported) {
+                    total += v
+                    any = true
+                }
+            }
+            return if (any) total else UNSUPPORTED
         }
 
         private var netStats: NetStats? = null
@@ -52,10 +103,13 @@ interface NetStats {
 
         private fun create(clazz: Class<out NetStats>): NetStats? {
             return try {
+                @Suppress("DEPRECATION")
                 clazz.newInstance()
             } catch (e: Exception) {
+                // Construction can fail on older API levels (e.g. Android31NetStats).
+                // Return null so the caller continues to the next implementation.
                 e.printStackTrace()
-                NormalNetStats()
+                null
             }
         }
     }

@@ -1,9 +1,14 @@
 package com.dede.nativetools
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.dede.nativetools.netspeed.NetSpeedPreferences
 import com.dede.nativetools.netspeed.service.NetSpeedService
 
@@ -15,15 +20,34 @@ class LauncherReceiver : BroadcastReceiver() {
 
         when (action) {
             Intent.ACTION_BOOT_COMPLETED -> {
-                // 开机自启的设置状态
-                val autoBoot = NetSpeedPreferences.autoStart
-                if (autoBoot) {
-                    NetSpeedService.launchForeground(context)
+                if (NetSpeedPreferences.autoStart) {
+                    launchIfAllowed(context)
                 }
             }
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
-                NetSpeedService.launchForeground(context)
+                launchIfAllowed(context)
             }
         }
+    }
+
+    private fun launchIfAllowed(context: Context) {
+        if (!canPostNotifications(context)) {
+            Log.w("LauncherReceiver", "skip startForegroundService: notifications not allowed")
+            return
+        }
+        NetSpeedService.launchForeground(context)
+    }
+
+    private fun canPostNotifications(context: Context): Boolean {
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            return false
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            return ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+        return true
     }
 }
