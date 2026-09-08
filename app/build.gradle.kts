@@ -5,7 +5,12 @@ import groovy.json.JsonSlurper
 
 val keystoreProperties =
     Properties().apply {
-        rootProject.file("key.properties").takeIf { it.exists() }?.inputStream()?.use(this::load)
+        // Prefer keystore.properties; keep key.properties as a local fallback (both gitignored).
+        sequenceOf("keystore.properties", "key.properties")
+            .map { rootProject.file(it) }
+            .firstOrNull { it.exists() }
+            ?.inputStream()
+            ?.use(this::load)
     }
 
 plugins {
@@ -26,8 +31,8 @@ android {
         applicationId = "app.yomu.netbar"
         minSdk = 23
         targetSdk = 35
-        versionCode = 66
-        versionName = "4.1.1"
+        versionCode = 67
+        versionName = "4.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         resourceConfigurations.addAll(
@@ -38,6 +43,10 @@ android {
         // https://stackoverflow.com/a/52508858/10008797
         setProperty("archivesBaseName", "native_tools_${versionName}_$versionCode")
         buildConfigField("long", "BUILD_TIMESTAMP", "${Date().time}")
+
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     signingConfigs {

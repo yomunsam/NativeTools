@@ -5,30 +5,22 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
+# Keep line numbers for crash stacks; hide original source file names.
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
 -renamesourcefileattribute SourceFile
 
 -printconfiguration ./build/full-r8-config.txt
 
+# --- NetStats: constructed via Class.newInstance() reflection ---
 -keep public class * extends app.yomu.netbar.netspeed.stats.NetStats {
    public <init>();
 }
 
--keep class me.weishu.reflection.* {*;}
+# FreeReflection (hidden API bypass)
+-keep class me.weishu.reflection.** { *; }
 
+# AppCompat Spinner popup field accessed via reflection
 -keepclassmembernames class androidx.appcompat.widget.AppCompatSpinner {
     private androidx.appcompat.widget.AppCompatSpinner$SpinnerPopup mPopup;
 }
@@ -36,13 +28,54 @@
     android.widget.PopupWindow mPopup;
 }
 
+# Coroutines MainDispatcherFactory / exception handlers (service loader)
 -dontwarn com.google.errorprone.annotations.Immutable
 -keepnames class * extends kotlinx.coroutines.internal.MainDispatcherFactory
 -keepnames class * extends kotlinx.coroutines.CoroutineExceptionHandler
 
--keep class app.yomu.netbar.network.Api {*;}
+# --- Retrofit ---
+# Keep service interface methods (signatures used for HTTP annotations).
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes AnnotationDefault
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+-keep class app.yomu.netbar.network.Api { *; }
 
-# OkHttp
+# --- Moshi (KotlinJsonAdapterFactory / reflective adapters) ---
+-keepclassmembers class ** {
+    @com.squareup.moshi.Json <fields>;
+    @com.squareup.moshi.FromJson <methods>;
+    @com.squareup.moshi.ToJson <methods>;
+}
+-dontwarn com.squareup.moshi.**
+-keep class kotlin.reflect.** { *; }
+-dontwarn kotlin.reflect.**
+
+# --- OkHttp ---
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+
+# --- Glide ---
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep class * extends com.bumptech.glide.module.AppGlideModule { <init>(...); }
+-keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
+    **[] $VALUES;
+    public *;
+}
+-dontwarn com.bumptech.glide.**
+
+# --- Parcelable (kotlin-parcelize + hand-written CREATORs) ---
+-keepnames class * implements android.os.Parcelable
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+
+# --- Preference (custom Preference subclasses / XML inflation) ---
+-keep public class * extends androidx.preference.Preference {
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
