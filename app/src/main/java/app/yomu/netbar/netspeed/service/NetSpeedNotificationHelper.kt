@@ -43,6 +43,11 @@ object NetSpeedNotificationHelper {
     @Volatile private var lastSilence: Boolean? = null
     @Volatile private var lastIconBitmap: Bitmap? = null
 
+    // Usage (NetworkStats) throttle — not every speed tick
+    private const val USAGE_QUERY_THROTTLE_MS = 60_000L
+    @Volatile private var cachedUsageText: String? = null
+    @Volatile private var lastUsageQueryElapsed: Long = 0L
+
     private fun isSecure(context: Context): Boolean {
         val keyguardManager = context.requireSystemService<KeyguardManager>()
         return keyguardManager.isDeviceSecure || keyguardManager.isKeyguardSecure
@@ -112,8 +117,35 @@ object NetSpeedNotificationHelper {
         return areNotificationsEnabled && !channelDisabled
     }
 
+    /**
+     * Throttled usage line for notification. Queries NetworkStats at most once per minute;
+     * fails soft (null) without usage permission. Speed sampling stays on its own interval.
+     */
+    private fun getUsageTextThrottled(
+        context: Context,
+        configuration: NetSpeedConfiguration,
+        force: Boolean = false,
+    ): String? {
+        if (!configuration.usage) return null
+        if (!Logic.checkAppOps(context)) {
+            cachedUsageText = null
+            return null
+        }
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (
+            !force &&
+                cachedUsageText != null &&
+                now - lastUsageQueryElapsed < USAGE_QUERY_THROTTLE_MS
+        ) {
+            return cachedUsageText
+        }
+        lastUsageQueryElapsed = now
+        cachedUsageText = queryUsageText(context, configuration)
+        return cachedUsageText
+    }
+
     /** 获取数据使用量 — NetworkStatsManager device buckets, no IMSI. */
-    private fun getUsageText(context: Context, configuration: NetSpeedConfiguration): String? {
+    private fun queryUsageText(context: Context, configuration: NetSpeedConfiguration): String? {
         if (!Logic.checkAppOps(context)) {
             return null
         }
@@ -208,6 +240,8 @@ object NetSpeedNotificationHelper {
         lastContentTitle = null
         lastContentText = null
         lastSilence = null
+        // Force next usage refresh when configuration / screen-on invalidates
+        lastUsageQueryElapsed = 0L
         BitmapPoolAccessor.recycle(old)
     }
 
@@ -227,7 +261,7 @@ object NetSpeedNotificationHelper {
         val contentTitle =
             context.getString(R.string.notify_net_speed_msg, uploadSpeedStr, downloadSpeedStr)
         val contentText =
-            if (configuration.usage) getUsageText(context, configuration) else null
+            getUsageTextThrottled(context, configuration)
 
         val iconBitmap =
             if (configuration.showBlankNotification) {
@@ -285,7 +319,7 @@ object NetSpeedNotificationHelper {
         val contentTitle =
             context.getString(R.string.notify_net_speed_msg, uploadSpeedStr, downloadSpeedStr)
         val contentText =
-            if (configuration.usage) getUsageText(context, configuration) else null
+            getUsageTextThrottled(context, configuration)
         val notification =
             createNotification(context, configuration, smileIcon, contentTitle, contentText)
         // API 34+: pass FGS type matching the manifest specialUse declaration.

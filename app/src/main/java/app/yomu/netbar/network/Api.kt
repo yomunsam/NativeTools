@@ -1,6 +1,5 @@
 package app.yomu.netbar.network
 
-import app.yomu.netbar.donate.DonateInfo
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.io.InputStream
@@ -22,10 +21,6 @@ interface Api {
 
     @GET("fonts/-/raw/master/{fontName}")
     suspend fun downloadFont(@Path("fontName") fontName: String): InputStream
-
-    // @GET("http://10.103.0.157:8000/donate_list.json")
-    @GET("NativeTools/-/raw/develop/apis/donate_list.json")
-    suspend fun getDonateList(): List<DonateInfo>
 }
 
 private val proxy by lazy {

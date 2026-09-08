@@ -2,10 +2,6 @@
 
 [libraries]
 tinify = "com.tinify:tinify:1.6.4"
-google-services = "com.google.gms:google-services:4.4.2"
-firebase-crashlytics-gradle = "com.google.firebase:firebase-crashlytics-gradle:3.0.2"
-firebase-perf-gradle = "com.google.firebase:perf-plugin:1.4.2"
-firebase-appdistribution-gradle = "com.google.firebase:firebase-appdistribution-gradle:5.1.1"
 google-oss-license = "com.google.android.gms:oss-licenses-plugin:0.10.6"
 
 # AndroidX — stable, compatible with AGP 8.1.4 / compileSdk 35 / Kotlin 1.9.22
@@ -39,12 +35,6 @@ squareup-moshi = "com.squareup.moshi:moshi-kotlin:1.15.1"
 squareup-leakcanary-startup = "com.squareup.leakcanary:leakcanary-android-startup:2.14"
 squareup-leakcanary-core = "com.squareup.leakcanary:leakcanary-android-core:2.14"
 
-# Firebase BOM — reasonably current; keep *-ktx coords (BOM resolves versions)
-firebase-bom = "com.google.firebase:firebase-bom:33.7.0"
-# get recommended versions from the platform project
-firebase-analytics-ktx = "com.google.firebase:firebase-analytics-ktx:*"
-firebase-crashlytics-ktx = "com.google.firebase:firebase-crashlytics-ktx:*"
-firebase-perf-ktx = "com.google.firebase:firebase-perf-ktx:*"
 play-services-oss-licenses = "com.google.android.gms:play-services-oss-licenses:17.1.0"
 
 junit = "junit:junit:4.13.2"
@@ -52,8 +42,6 @@ androidx-junit = "androidx.test.ext:junit:1.2.1"
 androidx-expresso-core = "androidx.test.espresso:espresso-core:3.6.1"
 
 [bundles]
-firebase-gradle = ["firebase-crashlytics-gradle", "firebase-perf-gradle", "firebase-appdistribution-gradle"]
-firebase-ktx = ["firebase-analytics-ktx", "firebase-crashlytics-ktx", "firebase-perf-ktx"]
 androidx-navigation = ["androidx-navigation-ui-ktx", "androidx-navigation-fragment-ktx", "androidx-navigation-runtime-ktx"]
 androidx-lifecycle = ["androidx-lifecycle-common", "androidx-lifecycle-livedata-ktx",
     "androidx-lifecycle-runtime-ktx", "androidx-lifecycle-viewmodel-ktx"]

@@ -8,7 +8,6 @@ import android.content.ComponentCallbacks2
 import android.content.Context
 import android.os.Build
 import android.os.Process
-import com.google.firebase.perf.metrics.AddTrace
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -45,7 +44,6 @@ fun Context.mainProcess(): ActivityManager.RunningAppProcessInfo? {
     return null
 }
 
-@AddTrace(name = "主进程判断")
 fun Context.isMainProcess(): Boolean {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         val processName = Application.getProcessName()

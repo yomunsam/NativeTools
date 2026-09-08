@@ -10,13 +10,14 @@
 
     <string name="label_net_speed">网速指示器</string>
     <string name="label_net_speed_interval">刷新间隔</string>
+    <string name="summary_net_speed_interval">默认 2 秒，偏省电；也可选更快刷新</string>
     <string name="label_net_speed_hide_lock_notification">隐藏锁屏通知</string>
     <string name="label_net_speed_notify_clickable">通知可被点击</string>
     <string name="label_net_speed_mode">显示模式</string>
     <string name="label_net_speed_auto_start">开机自启</string>
     <string name="label_net_speed_notify_quick_closeable">通知快捷关闭</string>
     <string name="label_night_mode">夜间模式</string>
-    <string name="label_net_speed_usage">显示每日和每月流量使用</string>
+    <string name="label_net_speed_usage">通知显示流量使用（可选）</string>
     <string name="label_about">关于</string>
     <string name="label_ignore_battery_optimize">忽略电池优化</string>
     <string name="label_notification_permission">通知权限</string>
@@ -27,7 +28,7 @@
     <string name="summary_net_speed_auto_start">跟随系统启动前台服务</string>
     <string name="summary_net_speed_notify_quick_closeable">在网速通知上添加一个关闭按钮</string>
     <string name="summary_night_mode_follow_system">跟随系统</string>
-    <string name="summary_net_speed_usage">通知显示移动数据和WLAN流量使用总和</string>
+    <string name="summary_net_speed_usage">可选：在通知第二行显示今日/本月用量（默认关闭，减少 OEM 折叠）。需使用情况访问权限</string>
     <string name="summary_ignore_battery_optimize">添加电池优化白名单，防止前台服务无法保活（针对部分设备）</string>
     <string name="summary_notification_permission">开启后才能正常显示网速通知。若已拒绝，请前往系统设置开启</string>
     <string name="summary_notification_permission_granted">已开启，点击可管理通知设置</string>
@@ -90,7 +91,6 @@
     <string name="alert_msg_guide" formatted="false">感谢您使用%s，我们尊重并保护您的个人信息，并在%s对相关事项进行了详细说明，包括应用所可能需要的设备敏感权限说明。\n在使用我们的产品前，请您认真阅读%s的全部内容。</string>
 
     <string name="label_pgyer">蒲公英</string>
-    <string name="label_firebase">Firebase🪜</string>
     <string name="label_payment_wxpay">微信</string>
     <string name="label_payment_alipay">支付宝</string>
     <string name="label_payment_eth">以太坊</string>

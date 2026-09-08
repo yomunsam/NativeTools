@@ -20,7 +20,6 @@ import app.yomu.netbar.other.OtherPreferences
 import app.yomu.netbar.netspeed.utils.NetFormatter
 import app.yomu.netbar.ui.CustomWidgetLayoutSwitchPreference
 import app.yomu.netbar.util.*
-import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.flow.firstOrNull
 
 /** 网速指示器设置页 */
@@ -286,10 +285,6 @@ class NetSpeedFragment :
             }
             NetSpeedPreferences.KEY_NET_SPEED_INTERVAL -> {
                 configuration.interval = (newValue as String).toInt()
-                event(FirebaseAnalytics.Event.SELECT_ITEM) {
-                    param(FirebaseAnalytics.Param.ITEM_NAME, configuration.interval.toLong())
-                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "刷新间隔")
-                }
             }
             NetSpeedPreferences.KEY_NET_SPEED_HIDE_THRESHOLD -> {
                 val strValue = (newValue as String)
@@ -299,10 +294,6 @@ class NetSpeedFragment :
                     return false
                 }
                 configuration.hideThreshold = hideThreshold
-                event(FirebaseAnalytics.Event.SELECT_ITEM) {
-                    param(FirebaseAnalytics.Param.ITEM_NAME, configuration.hideThreshold)
-                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "隐藏阈值")
-                }
 
                 val hideThresholdStr = hideThreshold.toString()
                 if (hideThresholdStr != newValue) {

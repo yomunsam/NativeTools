@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 
 /**
  * Preference keys for net-usage toggles, plus legacy IMSI storage.
@@ -38,8 +36,7 @@ class NetUsageConfigs(context: Context) {
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        } catch (e: Throwable) {
-            Firebase.crashlytics.recordException(e)
+        } catch (_: Throwable) {
             context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         }
 

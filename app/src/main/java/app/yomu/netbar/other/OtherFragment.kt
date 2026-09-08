@@ -17,7 +17,6 @@ import app.yomu.netbar.netspeed.service.NetSpeedNotificationHelper
 import app.yomu.netbar.main.applyBottomBarsInsets
 import app.yomu.netbar.ui.NightModeDropDownPreference
 import app.yomu.netbar.util.*
-import com.google.firebase.analytics.FirebaseAnalytics
 
 class OtherFragment : PreferenceFragmentCompat() {
 
@@ -93,18 +92,6 @@ class OtherFragment : PreferenceFragmentCompat() {
 
         requirePreference<Preference>(OtherPreferences.KEY_FEEDBACK).onPreferenceClickListener {
             requireContext().browse(R.string.url_github_issues)
-            event(FirebaseAnalytics.Event.SELECT_ITEM) {
-                param(FirebaseAnalytics.Param.ITEM_NAME, "问题反馈")
-            }
-        }
-        requirePreference<Preference>(OtherPreferences.KEY_RATE).onPreferenceClickListener {
-            requireContext().market(requireContext().packageName)
-            event(FirebaseAnalytics.Event.SELECT_ITEM) {
-                param(FirebaseAnalytics.Param.ITEM_NAME, "去评分")
-            }
-        }
-        requirePreference<Preference>(OtherPreferences.KEY_SHARE).onPreferenceClickListener {
-            Logic.shareApp(requireContext())
         }
     }
 

@@ -147,7 +147,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
         if (count == ENABLE_FOLLOW_COUNT) {
             if (target == ENABLE_FOLLOW_COUNT) {
                 toast("BZZZTT!!1!🥚")
-                event("enable_egg")
             }
             binding.ivLogo.dragEnable = true
         }

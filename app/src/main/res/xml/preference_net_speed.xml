@@ -27,10 +27,11 @@
 
         <DropDownPreference
             android:key="net_speed_interval"
-            app:defaultValue="1000"
+            app:defaultValue="2000"
             app:entries="@array/net_speed_interval"
             app:entryValues="@array/net_speed_interval_value"
             app:icon="@drawable/ic_baseline_timer"
+            app:summary="@string/summary_net_speed_interval"
             app:title="@string/label_net_speed_interval"
             tools:useSimpleSummaryProvider="true" />
 
@@ -54,7 +55,6 @@
             tools:useSimpleSummaryProvider="true" />
 
         <app.yomu.netbar.ui.NavigatePreference
-            app:eventName="高级设置"
             app:icon="@drawable/ic_outline_settings"
             app:navigateId="@id/action_netSpeed_to_netSpeedAdvanced"
             app:summary="@string/summary_net_speed_advanced"

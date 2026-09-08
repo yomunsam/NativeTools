@@ -39,21 +39,6 @@
         android:id="@+id/openSource"
         android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity" />
 
-    <dialog
-        android:id="@+id/dialogDonate"
-        android:name="app.yomu.netbar.donate.DonateDialogFragment"
-        android:label="@string/action_donate"
-        tools:layout="@layout/fragment_bottom_sheet_list">
-        <action
-            android:id="@+id/action_dialogDonate_to_dialogDonateList"
-            app:destination="@id/dialogDonateList" />
-    </dialog>
-
-    <dialog
-        android:id="@+id/dialogDonateList"
-        android:name="app.yomu.netbar.donate.DonateListFragment"
-        android:label="@string/label_donate_list" />
-
     <fragment
         android:id="@+id/other"
         android:name="app.yomu.netbar.other.OtherFragment"
@@ -65,12 +50,6 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-        <action
-            android:id="@+id/action_other_to_dialogDonate"
-            app:destination="@id/dialogDonate" />
-        <action
-            android:id="@+id/action_other_to_dialogBeta"
-            app:destination="@id/dialogBeta" />
     </fragment>
 
     <fragment
@@ -99,9 +78,4 @@
         android:name="app.yomu.netbar.main.SetupChecklistDialogFragment"
         android:label="@string/label_setup_checklist"
         tools:layout="@layout/dialog_setup_checklist" />
-
-    <dialog
-        android:id="@+id/dialogBeta"
-        android:name="app.yomu.netbar.beta.BetaFragment"
-        tools:layout="@layout/fragment_bottom_sheet_list" />
 </navigation>

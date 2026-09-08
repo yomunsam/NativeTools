@@ -4,27 +4,27 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.os.HandlerCompat
-import app.yomu.netbar.netspeed.INetSpeedInterface
 import app.yomu.netbar.netspeed.NetSpeedConfiguration
 import app.yomu.netbar.netspeed.NetSpeedPreferences
 import app.yomu.netbar.netspeed.utils.NetSpeedCompute
 import app.yomu.netbar.util.*
 import kotlin.math.max
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
 
+/**
+ * Foreground net-speed service — runs in the default (main) process.
+ * Configuration updates use a local Binder (same-process); no AIDL.
+ */
 class NetSpeedService : Service(), Runnable {
 
-    class NetSpeedBinder(private val service: NetSpeedService) : INetSpeedInterface.Stub() {
-
-        private val coroutineScope = CoroutineScope(Dispatchers.Main + service.lifecycleJob)
-
-        override fun updateConfiguration(configuration: NetSpeedConfiguration?) {
-            if (configuration == null) return
-            coroutineScope.launch { service.updateConfiguration(configuration) }
+    class LocalBinder(private val service: NetSpeedService) : Binder() {
+        fun updateConfiguration(configuration: NetSpeedConfiguration) {
+            service.updateConfiguration(configuration)
         }
     }
 
@@ -65,6 +65,8 @@ class NetSpeedService : Service(), Runnable {
     private val powerManager: PowerManager by systemService()
 
     val lifecycleJob = Job()
+
+    private val localBinder = LocalBinder(this)
 
     private val showBlankNotificationRunnable = this
 
@@ -116,7 +118,7 @@ class NetSpeedService : Service(), Runnable {
         )
 
     override fun onBind(intent: Intent): IBinder {
-        return NetSpeedBinder(this)
+        return localBinder
     }
 
     override fun onCreate() {
@@ -135,19 +137,17 @@ class NetSpeedService : Service(), Runnable {
                     stopSelf()
                 }
                 Intent.ACTION_SCREEN_ON -> {
-                    track("网速服务广播亮屏恢复") {
-                        // TEMP_POWER: restore configured / power-save interval
-                        isScreenOff = false
-                        applySamplingInterval()
-                        // 直接更新指示器（采样未停，强制刷一次通知）
-                        NetSpeedNotificationHelper.invalidateDirtyCache()
-                        NetSpeedNotificationHelper.notification(
-                            this,
-                            configuration,
-                            netSpeedCompute.rxSpeed,
-                            netSpeedCompute.txSpeed
-                        )
-                    }
+                    // TEMP_POWER: restore configured / power-save interval
+                    isScreenOff = false
+                    applySamplingInterval()
+                    // 直接更新指示器（采样未停，强制刷一次通知）
+                    NetSpeedNotificationHelper.invalidateDirtyCache()
+                    NetSpeedNotificationHelper.notification(
+                        this,
+                        configuration,
+                        netSpeedCompute.rxSpeed,
+                        netSpeedCompute.txSpeed
+                    )
                 }
                 Intent.ACTION_SCREEN_OFF -> {
                     // TEMP_POWER: keep sampling, temporarily lower interval (do not pause)
@@ -177,7 +177,7 @@ class NetSpeedService : Service(), Runnable {
         netSpeedCompute.interval = interval
     }
 
-    private fun updateConfiguration(configuration: NetSpeedConfiguration?) {
+    fun updateConfiguration(configuration: NetSpeedConfiguration?) {
         if (configuration == null || configuration == this.configuration) {
             return
         }

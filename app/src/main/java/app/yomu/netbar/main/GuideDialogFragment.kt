@@ -41,8 +41,6 @@ class GuideDialogFragment : DialogFragment() {
             setMessage(span)
             negativeButton(android.R.string.cancel) { requireActivity().finish() }
             positiveButton(android.R.string.ok) {
-                // TEMP_TELEMETRY_OFF: keep Analytics off by default for this fork
-                // Firebase.analytics.setAnalyticsCollectionEnabled(true)
                 NetSpeedPreferences.privacyAgreed = true
             }
         }

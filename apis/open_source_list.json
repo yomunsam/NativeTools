@@ -97,14 +97,6 @@
     "license": "https://www.apache.org/licenses/LICENSE-2.0.txt"
   },
   {
-    "name": "Firebase",
-    "author": "Google",
-    "desc": "Firebase is an app development platform with tools to help you build, grow and monetize your app.",
-    "website": "https://firebase.google.com/",
-    "logo": "android.resource://app.yomu.netbar/drawable/ic_logo_firebase",
-    "license": "https://www.apache.org/licenses/LICENSE-2.0.txt"
-  },
-  {
     "name": "Glide",
     "author": "Bump Technologies",
     "desc": "Glide is a fast and efficient image loading library for Android focused on smooth scrolling.",

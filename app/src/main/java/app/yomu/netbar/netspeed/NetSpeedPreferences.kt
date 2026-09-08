@@ -40,7 +40,7 @@ object NetSpeedPreferences {
     private const val KEY_MIUI_ALERTED = "miui_alerted"
     private const val KEY_SETUP_CHECKLIST_DISMISSED = "setup_checklist_dismissed"
 
-    const val DEFAULT_INTERVAL = 1000
+    const val DEFAULT_INTERVAL = 2000
     const val DEFAULT_TEXT_STYLE = Typeface.BOLD
     const val DEFAULT_FONT = TypefaceGetter.FONT_NORMAL
 

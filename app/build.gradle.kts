@@ -13,11 +13,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.parcelize")
 
-    id("com.google.gms.google-services")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("com.google.firebase.crashlytics")
-    id("com.google.firebase.firebase-perf")
-    id("com.google.firebase.appdistribution")
 }
 
 apply(from = "../gradle/spotless.gradle")
@@ -74,17 +70,13 @@ android {
         create("beta") {
             initWith(getByName("release"))
             versionNameSuffix = "-beta"
-            firebaseAppDistribution {
-                groups = "beta"
-                releaseNotesFile = file("beta-distribution-nodes.txt").absolutePath
-            }
         }
     }
 
     buildFeatures {
         viewBinding = true
         buildConfig = true
-        aidl = true
+        aidl = false
     }
 
     compileOptions {
@@ -122,8 +114,6 @@ dependencies {
     implementation(deps.squareup.moshi)
 
     implementation(deps.play.services.oss.licenses)
-    implementation(platform(deps.firebase.bom))
-    implementation(deps.bundles.firebase.ktx)
 
     debugImplementation(deps.bundles.squareup.leakcanary)
 

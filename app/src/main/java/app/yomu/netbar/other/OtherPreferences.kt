@@ -14,8 +14,6 @@ object OtherPreferences {
 
     const val KEY_ABOUT = "about"
     const val KEY_FEEDBACK = "feedback"
-    const val KEY_RATE = "rate"
-    const val KEY_SHARE = "share"
 
     private const val DEFAULT_NIGHT_MODE = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 

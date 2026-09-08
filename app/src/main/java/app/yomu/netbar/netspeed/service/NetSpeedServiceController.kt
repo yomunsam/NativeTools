@@ -4,20 +4,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.os.RemoteException
 import androidx.core.content.ContextCompat
-import app.yomu.netbar.netspeed.INetSpeedInterface
 import app.yomu.netbar.netspeed.NetSpeedConfiguration
+import app.yomu.netbar.netspeed.NetSpeedPreferences
 import app.yomu.netbar.util.BroadcastHelper
 import app.yomu.netbar.util.Intent
-import app.yomu.netbar.util.toast
 
-class NetSpeedServiceController(context: Context) :
-    INetSpeedInterface.Default(), ServiceConnection {
+/** Same-process controller: binds to [NetSpeedService] via [NetSpeedService.LocalBinder]. */
+class NetSpeedServiceController(context: Context) : ServiceConnection {
 
     private val appContext = context.applicationContext
 
-    private var binder: INetSpeedInterface? = null
+    private var binder: NetSpeedService.LocalBinder? = null
 
     private val broadcastHelper = BroadcastHelper(NetSpeedService.ACTION_CLOSE)
 
@@ -51,18 +49,23 @@ class NetSpeedServiceController(context: Context) :
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        binder = INetSpeedInterface.Stub.asInterface(service)
+        binder = service as? NetSpeedService.LocalBinder
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
         binder = null
     }
 
-    override fun updateConfiguration(configuration: NetSpeedConfiguration) {
-        try {
-            binder?.updateConfiguration(configuration)
-        } catch (e: RemoteException) {
-            appContext.toast("error")
+    fun updateConfiguration(configuration: NetSpeedConfiguration) {
+        val local = binder
+        if (local != null) {
+            local.updateConfiguration(configuration)
+            return
         }
+        // Not bound: only restart FGS when the indicator is meant to be on
+        if (!NetSpeedPreferences.status) return
+        val intent = NetSpeedService.createIntent(appContext)
+        intent.putExtra(NetSpeedService.EXTRA_CONFIGURATION, configuration)
+        ContextCompat.startForegroundService(appContext, intent)
     }
 }

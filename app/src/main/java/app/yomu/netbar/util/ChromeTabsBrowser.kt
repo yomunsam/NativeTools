@@ -6,9 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.browser.customtabs.*
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.perf.metrics.AddTrace
 
 /**
  * CustomTabs Help
@@ -67,7 +64,6 @@ object ChromeTabsBrowser {
     }
 
     /** 预热并预加载 */
-    @AddTrace(name = "CustomTabs.warmup")
     fun warmup(context: Context, vararg mayLaunchUrls: Uri): Boolean {
         if (customTabsSession != null) return true
         this.mayLaunchUrls = mayLaunchUrls
@@ -79,7 +75,6 @@ object ChromeTabsBrowser {
         )
     }
 
-    @AddTrace(name = "CustomTabs.launch")
     fun launchUrl(context: Context, uri: Uri) {
         val colorScheme =
             if (isNightMode()) CustomTabsIntent.COLOR_SCHEME_DARK
@@ -99,8 +94,7 @@ object ChromeTabsBrowser {
         )
         try {
             customTabsIntent.launchUrl(context, uri)
-        } catch (e: Exception) {
-            Firebase.crashlytics.recordException(e)
+        } catch (_: Exception) {
         }
     }
 }

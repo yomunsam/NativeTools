@@ -42,13 +42,6 @@ fun installShortcuts() {
     val shortcuts =
         arrayListOf(
             context.createShortcutInfo(
-                "shortcut_share",
-                Intent(Intent.ACTION_VIEW, MainActivity.EXTRA_ACTION to MainActivity.ACTION_SHARE)
-                    .setClass(context, MainActivity::class.java),
-                R.drawable.ic_action_share,
-                R.string.action_share
-            ),
-            context.createShortcutInfo(
                 "shortcut_about",
                 Intent(Intent.ACTION_VIEW, Uri.parse("https://dede.nativetools/about"))
                     .setClass(context, MainActivity::class.java),

@@ -31,7 +31,6 @@ import app.yomu.netbar.netspeed.service.NetSpeedService
 import app.yomu.netbar.other.OtherPreferences
 import app.yomu.netbar.ui.NavigatePreference
 import app.yomu.netbar.util.*
-import com.google.firebase.analytics.FirebaseAnalytics
 
 /** Main */
 class MainActivity :
@@ -43,7 +42,6 @@ class MainActivity :
         const val EXTRA_ACTION = "extra_action"
 
         const val ACTION_TOGGLE = 1
-        const val ACTION_SHARE = 2
     }
 
     private val binding by viewBinding {
@@ -172,9 +170,6 @@ class MainActivity :
                 finish()
                 return true
             }
-            ACTION_SHARE -> {
-                Logic.shareApp(this)
-            }
         }
         return false
     }
@@ -188,11 +183,7 @@ class MainActivity :
     }
 
     private fun handleDeepLink(intent: Intent?) {
-        if (navController.handleDeepLink(intent)) {
-            event(FirebaseAnalytics.Event.APP_OPEN) {
-                param(FirebaseAnalytics.Param.METHOD, "deeplink")
-            }
-        }
+        navController.handleDeepLink(intent)
     }
 
     override fun onSupportNavigateUp(): Boolean {

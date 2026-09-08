@@ -11,6 +11,7 @@
     <string name="switch_off">OFF</string>
     <string name="action_close">CLOSE</string>
     <string name="expand_button_title">More Options</string>
+    <string name="summary_net_speed_interval">Default 2s for battery; faster options available</string>
     <string name="label_net_speed_interval">Interval</string>
     <string name="label_net_speed_mode">Show mode</string>
     <string name="label_net_speed_auto_start">Automatic startup</string>
@@ -37,8 +38,8 @@
     <string name="summary_night_mode_follow_system">Follow System</string>
     <string name="label_night_mode">Night Mode</string>
     <string name="label_net_speed_toggle">Toggle</string>
-    <string name="label_net_speed_usage">Displays daily and monthly traffic usage</string>
-    <string name="summary_net_speed_usage">Notifications display the total usage of mobile data and WLAN traffic</string>
+    <string name="label_net_speed_usage">Show usage on notification (optional)</string>
+    <string name="summary_net_speed_usage">Optional: show today/month usage on the notification second line (off by default to avoid OEM collapse). Needs usage access.</string>
     <string name="alert_msg_hide_lock_notification">Sometimes the inability to hide notifications can be caused by the lock screen setting. Find \"Hide lock screen notifications\" in Settings and select \"Show sensitive content only\" or \"Hide all notifications\".</string>
     <string name="label_general">General</string>
     <string name="label_notification">Notification</string>

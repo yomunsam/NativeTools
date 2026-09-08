@@ -11,11 +11,6 @@ import app.yomu.netbar.util.setNightMode
 import com.google.android.material.R
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
-import com.google.firebase.FirebaseApp
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.perf.ktx.performance
 import me.weishu.reflection.Reflection
 
 class NativeToolsApp : Application() {
@@ -43,7 +38,6 @@ class NativeToolsApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        initFirebase()
         val options =
             DynamicColorsOptions.Builder()
                 .setThemeOverlay(R.style.ThemeOverlay_Material3_DynamicColors_DayNight)
@@ -56,19 +50,6 @@ class NativeToolsApp : Application() {
             installShortcuts()
             setNightMode(OtherPreferences.nightMode)
         }
-    }
-
-    private fun initFirebase() {
-        if (FirebaseApp.initializeApp(this) == null) {
-            Log.i(TAG, "FirebaseApp initialization unsuccessful")
-        } else {
-            Log.i(TAG, "FirebaseApp initialization successful")
-        }
-        // TEMP_TELEMETRY_OFF: fork default — Analytics / Crashlytics / Perf collection disabled.
-        // Keep APIs so collection can be re-enabled later if needed.
-        Firebase.analytics.setAnalyticsCollectionEnabled(false)
-        Firebase.crashlytics.setCrashlyticsCollectionEnabled(false)
-        Firebase.performance.isPerformanceCollectionEnabled = false
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
