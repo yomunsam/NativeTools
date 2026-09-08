@@ -6,10 +6,11 @@ tasks.wrapper {
 }
 
 plugins {
-    id("com.android.application") version "7.2.1" apply false
-    id("com.android.library") version "7.2.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.7.10" apply false
-    id("com.diffplug.spotless") version "6.7.2" apply false
+    id("com.android.application") version "8.1.4" apply false
+    id("com.android.library") version "8.1.4" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("org.jetbrains.kotlin.plugin.parcelize") version "1.9.22" apply false
+    id("com.diffplug.spotless") version "6.25.0" apply false
 }
 
 buildscript {
@@ -22,7 +23,7 @@ buildscript {
 }
 
 task<Delete>("clean") {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }
 
 task<Task>("tinify") {

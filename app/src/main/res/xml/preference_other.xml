@@ -21,6 +21,14 @@
             app:summary="@string/summary_ignore_battery_optimize"
             app:title="@string/label_ignore_battery_optimize" />
 
+        <!-- TEMP_NOTIFY_PERM: Android 13+ notification permission / settings; remove when obsolete -->
+        <Preference
+            app:icon="@drawable/ic_outline_toggle_on"
+            app:key="notification_permission"
+            app:persistent="false"
+            app:summary="@string/summary_notification_permission"
+            app:title="@string/label_notification_permission" />
+
         <app.yomu.netbar.ui.NightModeDropDownPreference
             app:defaultValue="-1"
             app:entries="@array/night_mode_toggle"
@@ -38,22 +46,32 @@
             app:summary="@string/summary_about_version"
             app:title="@string/label_about" />
 
+        <Preference
+            app:icon="@drawable/ic_outline_feedback"
+            app:key="feedback"
+            app:persistent="false"
+            app:summary="@string/summary_feedback_github"
+            app:title="@string/action_feedback" />
+
         <app.yomu.netbar.ui.NavigatePreference
             app:allowDividerAbove="true"
             app:eventName="捐赠"
             app:icon="@drawable/ic_volunteer_activism"
+            app:isPreferenceVisible="false"
             app:navigateId="@id/action_other_to_dialogDonate"
             app:summary="@string/label_coffee"
             app:title="@string/action_donate" />
 
         <Preference
             app:icon="@drawable/ic_baseline_sentiment_very_satisfied"
+            app:isPreferenceVisible="false"
             app:key="rate"
             app:persistent="false"
             app:title="@string/action_rate" />
 
         <Preference
             app:icon="@drawable/ic_action_share"
+            app:isPreferenceVisible="false"
             app:key="share"
             app:persistent="false"
             app:summary="@string/summary_share_app"
@@ -62,6 +80,7 @@
         <app.yomu.netbar.ui.NavigatePreference
             app:eventName="@string/action_beta"
             app:icon="@drawable/ic_android_13_hero"
+            app:isPreferenceVisible="false"
             app:navigateId="@id/action_other_to_dialogBeta"
             app:summary="@string/summary_get_beta"
             app:title="@string/action_beta" />

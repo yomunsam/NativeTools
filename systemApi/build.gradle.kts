@@ -6,11 +6,11 @@ plugins {
 apply(from = "../gradle/spotless.gradle")
 
 android {
-    compileSdk = 32
+    namespace = "com.dede.systemapi"
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 32
 
         consumerProguardFiles("consumer-rules.pro")
     }

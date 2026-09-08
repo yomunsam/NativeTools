@@ -9,8 +9,11 @@ object OtherPreferences {
 
     const val KEY_NIGHT_MODE_TOGGLE = "night_mode_toggle"
     const val KEY_IGNORE_BATTERY_OPTIMIZE = "ignore_battery_optimize"
+    // TEMP_NOTIFY_PERM: notification permission / settings preference key
+    const val KEY_NOTIFICATION_PERMISSION = "notification_permission"
 
     const val KEY_ABOUT = "about"
+    const val KEY_FEEDBACK = "feedback"
     const val KEY_RATE = "rate"
     const val KEY_SHARE = "share"
 

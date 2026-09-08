@@ -19,6 +19,7 @@
     <string name="label_net_speed_usage">显示每日和每月流量使用</string>
     <string name="label_about">关于</string>
     <string name="label_ignore_battery_optimize">忽略电池优化</string>
+    <string name="label_notification_permission">通知权限</string>
 
     <string name="summary_net_speed">在状态栏显示当前网速</string>
     <string name="summary_net_speed_hide_lock_notification">锁屏时默认会隐藏通知，如果无效时才需要去设置隐藏锁屏通知</string>
@@ -28,6 +29,9 @@
     <string name="summary_night_mode_follow_system">跟随系统</string>
     <string name="summary_net_speed_usage">通知显示移动数据和WLAN流量使用总和</string>
     <string name="summary_ignore_battery_optimize">添加电池优化白名单，防止前台服务无法保活（针对部分设备）</string>
+    <string name="summary_notification_permission">开启后才能正常显示网速通知。若已拒绝，请前往系统设置开启</string>
+    <string name="summary_notification_permission_granted">已开启，点击可管理通知设置</string>
+    <string name="summary_notification_permission_denied">未开启，点击申请或前往系统设置</string>
 
     <string name="usage_states_title">使用情况访问授权</string>
     <string name="usage_stats_msg">统计流量使用情况时需要允许使用情况访问权限。</string>
@@ -98,6 +102,9 @@
     <string name="label_sim_card_config">配置SIM卡信息</string>
     <string name="alert_msg_add_imsi_config">输入您SIM卡的IMSI</string>
     <string name="label_mobile">移动网络</string>
+    <string name="label_net_usage_config_tip">移动网络流量按设备汇总统计，无需手动填写 IMSI。显示用量需要授予「使用情况访问」权限；未授权时显示为空/0。</string>
+    <string name="summary_usage_access_granted">已授权使用情况访问</string>
+    <string name="summary_usage_access_denied">未授权，点击前往系统设置开启</string>
     <string name="label_net_usage_config">网络使用情况配置</string>
     <string name="label_donate_list">捐赠记录</string>
     <string name="toast_network_error">网络加载失败</string>

@@ -1,10 +1,13 @@
 package app.yomu.netbar.netspeed.service
 
+import android.Manifest
 import android.app.KeyguardManager
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
@@ -12,6 +15,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationChannelGroupCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import app.yomu.netbar.R
 import app.yomu.netbar.main.MainActivity
@@ -53,19 +57,36 @@ object NetSpeedNotificationHelper {
         intent.newTask().launchActivity(context)
     }
 
+    /** Open app-level notification settings (for POST_NOTIFICATIONS / master switch). */
     fun goNotificationSetting(context: Context) {
         val packageName = context.packageName
         val intent =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Intent(
-                    Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS,
-                    Settings.EXTRA_APP_PACKAGE to packageName,
-                    Settings.EXTRA_CHANNEL_ID to CHANNEL_ID_DEFAULT
+                    Settings.ACTION_APP_NOTIFICATION_SETTINGS,
+                    Settings.EXTRA_APP_PACKAGE to packageName
                 )
             } else {
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:$packageName")
             }
         intent.newTask().launchActivity(context)
+    }
+
+    /**
+     * Whether the net-speed FGS notification is allowed to post.
+     * On API 33+ also requires [Manifest.permission.POST_NOTIFICATIONS].
+     */
+    fun canPostNotifications(context: Context): Boolean {
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            return false
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            return ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+        return true
     }
 
     fun areNotificationEnabled(context: Context): Boolean {
@@ -84,7 +105,7 @@ object NetSpeedNotificationHelper {
         return areNotificationsEnabled && !channelDisabled
     }
 
-    /** 获取数据使用量 */
+    /** 获取数据使用量 — NetworkStatsManager device buckets, no IMSI. */
     private fun getUsageText(context: Context, configuration: NetSpeedConfiguration): String? {
         if (!Logic.checkAppOps(context)) {
             return null
@@ -94,7 +115,7 @@ object NetSpeedNotificationHelper {
         var monthBytes: Long
         val sb = StringBuilder()
         if (!configuration.enableWifiUsage && !configuration.enableMobileUsage) {
-            // wifi和移动流量都关闭，显示全部
+            // wifi和移动流量都关闭，显示全部（设备级汇总，subscriberId=null）
             todayBytes =
                 NetUsageUtils.getNetUsageBytes(
                     context,
@@ -146,37 +167,20 @@ object NetSpeedNotificationHelper {
         if (configuration.enableWifiUsage) {
             sb.appendLine()
         }
-        // 移动流量
-        var imsiSet: Set<String?>? = configuration.imsiSet
-        if (imsiSet == null || imsiSet.isEmpty()) {
-            imsiSet = setOf<String?>(null)
-        }
-        val size = imsiSet.size
-        var index = 1
-        for (imsi in imsiSet) {
-            todayBytes =
-                NetUsageUtils.getNetUsageBytes(
-                    context,
-                    NetUsageUtils.TYPE_MOBILE,
-                    NetUsageUtils.RANGE_TYPE_TODAY,
-                    imsi
-                )
-            monthBytes =
-                NetUsageUtils.getNetUsageBytes(
-                    context,
-                    NetUsageUtils.TYPE_MOBILE,
-                    NetUsageUtils.RANGE_TYPE_MONTH,
-                    imsi
-                )
-            sb.append("SIM")
-            if (size > 1) {
-                sb.append(index)
-            }
-            sb.append(" • ").append(getUsageText(context, todayBytes, monthBytes))
-            if (index++ < size) {
-                sb.appendLine()
-            }
-        }
+        // 移动流量：设备级汇总，不再按 IMSI 分卡手填
+        todayBytes =
+            NetUsageUtils.getNetUsageBytes(
+                context,
+                NetUsageUtils.TYPE_MOBILE,
+                NetUsageUtils.RANGE_TYPE_TODAY
+            )
+        monthBytes =
+            NetUsageUtils.getNetUsageBytes(
+                context,
+                NetUsageUtils.TYPE_MOBILE,
+                NetUsageUtils.RANGE_TYPE_MONTH
+            )
+        sb.append("Mobile • ").append(getUsageText(context, todayBytes, monthBytes))
         return sb.toString()
     }
 
@@ -205,7 +209,16 @@ object NetSpeedNotificationHelper {
     fun startForeground(context: Service, configuration: NetSpeedConfiguration) {
         val smileIcon = createSmileIcon(configuration, 0, 0)
         val notification = createNotification(context, configuration, smileIcon, 0, 0)
-        context.startForeground(NOTIFICATION_ID, notification)
+        // API 34+: pass FGS type matching the manifest specialUse declaration.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            context.startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+            )
+        } else {
+            context.startForeground(NOTIFICATION_ID, notification)
+        }
         BitmapPoolAccessor.recycle(smileIcon.bitmap)
     }
 
@@ -274,7 +287,8 @@ object NetSpeedNotificationHelper {
             // https://developer.android.com/about/versions/12/behavior-changes-all#foreground-service-notification-delay
             builder.foregroundServiceBehavior = NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE
             // https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
-            pendingFlag = pendingFlag or PendingIntent.FLAG_MUTABLE
+            // Content/action intents are fully specified; prefer IMMUTABLE over MUTABLE.
+            pendingFlag = pendingFlag or PendingIntent.FLAG_IMMUTABLE
         }
 
         val downloadSpeedStr: String =

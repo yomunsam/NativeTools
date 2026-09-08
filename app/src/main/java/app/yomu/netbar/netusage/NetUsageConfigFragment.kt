@@ -1,30 +1,32 @@
 package app.yomu.netbar.netusage
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
-import android.widget.ImageView
 import androidx.lifecycle.lifecycleScope
-import androidx.preference.PreferenceCategory
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import app.yomu.netbar.R
 import app.yomu.netbar.netspeed.NetSpeedConfiguration
 import app.yomu.netbar.netspeed.NetSpeedPreferences
 import app.yomu.netbar.netspeed.service.NetSpeedServiceController
-import app.yomu.netbar.ui.CustomWidgetLayoutSwitchPreference
-import app.yomu.netbar.ui.MaterialEditTextPreference
 import app.yomu.netbar.util.*
 import kotlinx.coroutines.flow.firstOrNull
 
-/** 配置SIM卡IMSI */
+/**
+ * 网络使用情况配置（Wi‑Fi / 移动开关）。
+ *
+ * TEMP_OEM_IMSI: per-SIM IMSI hand-entry UI removed. Device-wide mobile buckets via
+ * NetworkStatsManager (subscriberId=null) cover normal dual-SIM cases without IMSI.
+ */
 class NetUsageConfigFragment : PreferenceFragmentCompat() {
 
-    private lateinit var simCardCategory: PreferenceCategory
-    private lateinit var addSimCardConfigPreference: MaterialEditTextPreference
-
-    private val netUsageConfigs: NetUsageConfigs by later { NetUsageConfigs(requireContext()) }
     private val controller by later { NetSpeedServiceController(requireContext()) }
     private val configuration = NetSpeedConfiguration()
+
+    private lateinit var usageAccessPreference: Preference
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStorePreference(requireContext())
@@ -43,14 +45,10 @@ class NetUsageConfigFragment : PreferenceFragmentCompat() {
                 true
             }
 
-        simCardCategory = requirePreference(NetUsageConfigs.KEY_IMSI_CONFIG_GROUP)
-        addSimCardConfigPreference = requirePreference(NetUsageConfigs.KEY_ADD_IMSI_CONFIG)
-        addSimCardConfigPreference.onPreferenceChangeListener<String> { _, newValue ->
-            if (newValue.isNotEmpty()) {
-                addSimCardConfigPreference(newValue)
+        usageAccessPreference =
+            requirePreference<Preference>(NetUsageConfigs.KEY_USAGE_ACCESS).also {
+                it.onPreferenceClickListener { openUsageAccessSettings() }
             }
-            return@onPreferenceChangeListener false
-        }
 
         if (NetSpeedPreferences.status) {
             controller.bindService()
@@ -62,8 +60,15 @@ class NetUsageConfigFragment : PreferenceFragmentCompat() {
         lifecycleScope.launchWhenCreated {
             val preferences = globalDataStore.data.firstOrNull() ?: return@launchWhenCreated
             configuration.updateFrom(preferences)
-            initSimCardCategory()
+            // TEMP_OEM_IMSI: do not push legacy IMSI set into the service config.
+            configuration.updateImsi(null)
+            refreshUsageAccessSummary()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        refreshUsageAccessSummary()
     }
 
     override fun onDestroyView() {
@@ -71,80 +76,24 @@ class NetUsageConfigFragment : PreferenceFragmentCompat() {
         super.onDestroyView()
     }
 
-    private fun updateImsiConfig() {
-        configuration.updateImsi(netUsageConfigs.getEnabledIMSI())
-        controller.updateConfiguration(configuration)
+    private fun refreshUsageAccessSummary() {
+        if (!::usageAccessPreference.isInitialized) return
+        val granted = Logic.checkAppOps(requireContext())
+        usageAccessPreference.summary =
+            if (granted) {
+                getString(R.string.summary_usage_access_granted)
+            } else {
+                getString(R.string.summary_usage_access_denied)
+            }
     }
 
-    private fun initSimCardCategory() {
-        simCardCategory.removeAll()
-        var index = 1
-        for (imsi in netUsageConfigs.getAllIMSI()) {
-            simCardCategory.addPreference(
-                createSimCardConfigPreference(index++, imsi, netUsageConfigs.isEnabled(imsi))
-            )
+    private fun openUsageAccessSettings() {
+        val context = requireContext()
+        val intent =
+            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, "package:${context.packageName}")
+        if (!intent.queryImplicitActivity(context)) {
+            intent.data = null
         }
-    }
-
-    private fun addSimCardConfigPreference(imsi: String) {
-        if (!netUsageConfigs.addIMSI(imsi)) return
-        val simCardConfigPreference =
-            createSimCardConfigPreference(simCardCategory.preferenceCount + 1, imsi, false)
-        simCardCategory.addPreference(simCardConfigPreference)
-    }
-
-    private fun removeSimCardConfigPreference(imsi: String) {
-        netUsageConfigs.deleteIMSI(imsi)
-        for (i in 0 until simCardCategory.preferenceCount) {
-            val preference = simCardCategory.getPreference(i)
-            if (preference.key == imsi) {
-                simCardCategory.removePreference(preference)
-                break
-            }
-        }
-        for (i in 0 until simCardCategory.preferenceCount) {
-            val preference = simCardCategory.getPreference(i)
-            preference.title = "SIM ${i + 1}"
-        }
-        updateImsiConfig()
-    }
-
-    private fun createSimCardConfigPreference(
-        index: Int,
-        imsi: String,
-        isChecked: Boolean,
-    ): SwitchPreferenceCompat {
-
-        fun String.privateIMSI(): String {
-            val size = this.length
-            if (size <= 4) return this
-
-            val arr = this.toCharArray()
-            for (i in 2 until size - 2) {
-                arr[i] = '*'
-            }
-            return String(arr)
-        }
-
-        return CustomWidgetLayoutSwitchPreference(requireContext(), null).apply {
-            this.widgetLayoutResource = R.layout.override_preference_widget_switch_compat
-            this.bindCustomWidget = {
-                val imageView = it.findViewById(R.id.iv_preference_help) as ImageView
-                imageView.setImageResource(R.drawable.ic_baseline_remove_circle)
-                imageView.setOnClickListener { removeSimCardConfigPreference(imsi) }
-            }
-            this.isPersistent = false // 不保存
-            this.title = "SIM $index"
-            this.key = imsi
-            this.summary = imsi.privateIMSI()
-            this.setIcon(R.drawable.ic_outline_sim_card)
-            this.setDefaultValue(isChecked) // 设置默认值，这时候还未onAttachedToHierarchy
-            this.isChecked = isChecked
-            this.onPreferenceChangeListener<Boolean> { _, newValue ->
-                netUsageConfigs.setIMSIEnabled(imsi, newValue)
-                updateImsiConfig()
-                return@onPreferenceChangeListener true
-            }
-        }
+        intent.launchActivity(context)
     }
 }

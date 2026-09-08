@@ -1,7 +1,7 @@
 import java.io.ByteArrayOutputStream
 import java.util.Date
 import java.util.Properties
-import org.json.JSONObject
+import groovy.json.JsonSlurper
 
 val keystoreProperties =
     Properties().apply {
@@ -11,7 +11,7 @@ val keystoreProperties =
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.parcelize")
 
     id("com.google.gms.google-services")
     id("com.google.android.gms.oss-licenses-plugin")
@@ -24,12 +24,12 @@ apply(from = "../gradle/spotless.gradle")
 
 android {
     namespace = "app.yomu.netbar"
-    compileSdk = 34
-    buildToolsVersion = "34.0.0"
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
     defaultConfig {
         applicationId = "app.yomu.netbar"
         minSdk = 23
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 66
         versionName = "4.1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -81,7 +81,11 @@ android {
         }
     }
 
-    viewBinding { isEnabled = true }
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+        aidl = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -153,12 +157,15 @@ tasks.register<Exec>("pgyer") {
     val output = ByteArrayOutputStream().apply { standardOutput = this }
     doLast {
         val result = output.toString()
-        val obj = JSONObject(result)
-        if (obj.getInt("code") == 0) {
-            val path = obj.getJSONObject("data").getString("buildShortcutUrl")
+        @Suppress("UNCHECKED_CAST")
+        val obj = JsonSlurper().parseText(result) as Map<String, Any?>
+        val code = (obj["code"] as Number).toInt()
+        if (code == 0) {
+            val data = obj["data"] as Map<*, *>
+            val path = data["buildShortcutUrl"].toString()
             println("Upload succeeded: https://www.pgyer.com/$path")
         } else {
-            val message = obj.getString("message")
+            val message = obj["message"].toString()
             println("Upload failed: $message")
         }
     }

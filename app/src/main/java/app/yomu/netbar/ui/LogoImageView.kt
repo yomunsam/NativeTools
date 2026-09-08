@@ -30,7 +30,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     companion object {
         private const val TAG = "LogoImageView"
 
-        private const val TAG_ID: Int = R.id.iv_logo
+        private val TAG_ID: Int = R.id.iv_logo
         private const val RESUME_ANIMATOR_DURATION: Long = 600L
         private const val FOLLOW_ANIMATOR_DURATION: Long = 70L
         private const val FOLLOW_ANIMATOR_START_DELAY: Long = FOLLOW_ANIMATOR_DURATION - 10L

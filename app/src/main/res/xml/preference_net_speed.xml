@@ -59,6 +59,14 @@
         app:key="key_notification"
         app:title="@string/label_notification">
 
+        <!-- TEMP_NOTIFY_PERM: discoverable notification permission entry; remove when obsolete -->
+        <Preference
+            app:icon="@drawable/ic_outline_toggle_on"
+            app:key="notification_permission"
+            app:persistent="false"
+            app:summary="@string/summary_notification_permission"
+            app:title="@string/label_notification_permission" />
+
         <app.yomu.netbar.ui.CustomWidgetLayoutSwitchPreference
             app:defaultValue="false"
             app:icon="@drawable/ic_outline_data_usage"

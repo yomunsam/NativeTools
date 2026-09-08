@@ -1,5 +1,6 @@
 package app.yomu.netbar.netspeed
 
+import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
@@ -15,6 +16,7 @@ import app.yomu.netbar.main.applyBottomBarsInsets
 import app.yomu.netbar.netspeed.service.NetSpeedNotificationHelper
 import app.yomu.netbar.netspeed.service.NetSpeedService
 import app.yomu.netbar.netspeed.service.NetSpeedServiceController
+import app.yomu.netbar.other.OtherPreferences
 import app.yomu.netbar.netspeed.utils.NetFormatter
 import app.yomu.netbar.ui.CustomWidgetLayoutSwitchPreference
 import app.yomu.netbar.util.*
@@ -35,6 +37,8 @@ class NetSpeedFragment :
     private lateinit var statusSwitchPreference: SwitchPreferenceCompat
     private lateinit var thresholdEditTextPreference: EditTextPreference
     private lateinit var intervalPreference: DropDownPreference
+    // TEMP_NOTIFY_PERM: discoverable notification permission entry
+    private lateinit var notificationPermissionPreference: Preference
 
     private val activityResultLauncherCompat =
         ActivityResultLauncherCompat(this, ActivityResultContracts.StartActivityForResult())
@@ -61,9 +65,11 @@ class NetSpeedFragment :
 
             val status = NetSpeedPreferences.status
             if (status) {
+                // startService sets the switch after POST_NOTIFICATIONS is granted
                 startService()
+            } else {
+                statusSwitchPreference.isChecked = false
             }
-            statusSwitchPreference.isChecked = status
         }
 
         if (!Logic.checkAppOps(requireContext())) {
@@ -130,6 +136,14 @@ class NetSpeedFragment :
     }
 
     private fun initNotificationPreferenceGroup() {
+        // TEMP_NOTIFY_PERM: visible action to request / open notification settings
+        notificationPermissionPreference =
+            requirePreference<Preference>(OtherPreferences.KEY_NOTIFICATION_PERMISSION).also {
+                it.onPreferenceClickListener {
+                    onNotificationPermissionPreferenceClick()
+                }
+            }
+
         usageSwitchPreference =
             requirePreference<CustomWidgetLayoutSwitchPreference>(
                 NetSpeedPreferences.KEY_NET_SPEED_USAGE
@@ -165,24 +179,74 @@ class NetSpeedFragment :
     }
 
     private fun startService() {
-
         fun startServiceInternal(check: Boolean = true) {
+            statusSwitchPreference.isChecked = true
             controller.startService(true)
             miuiNotificationAlert()
             if (check) {
                 checkNotificationEnable()
             }
+            refreshNotificationPermissionPreference()
         }
 
-        if (Build.VERSION.SDK_INT < 33/*Build.VERSION_CODES.T*/) {
+        // TEMP_NOTIFY_PERM: API 33+ must have POST_NOTIFICATIONS before FGS notification can show
+        if (Build.VERSION.SDK_INT < 33 /* Build.VERSION_CODES.TIRAMISU */) {
             startServiceInternal()
-        } else if (checkPermissions("android.permission.POST_NOTIFICATIONS")) {
+            return
+        }
+        if (checkPermissions(Manifest.permission.POST_NOTIFICATIONS)) {
             startServiceInternal()
-        } else {
-            permissionLauncherCompat.launch("android.permission.POST_NOTIFICATIONS") {
-                startServiceInternal(!it)
+            return
+        }
+        permissionLauncherCompat.launch(Manifest.permission.POST_NOTIFICATIONS) { granted ->
+            if (granted) {
+                startServiceInternal()
+            } else {
+                statusSwitchPreference.isChecked = false
+                // Permanently denied: system dialog will not show again — guide to settings
+                val permanentlyDenied =
+                    !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+                if (permanentlyDenied) {
+                    requireContext().showNotificationDisableDialog()
+                } else {
+                    toast(R.string.alert_msg_notification_disable)
+                }
+                refreshNotificationPermissionPreference()
             }
         }
+    }
+
+    /** TEMP_NOTIFY_PERM: preference click — request if possible, else open settings. */
+    private fun onNotificationPermissionPreferenceClick() {
+        val context = requireContext()
+        if (Build.VERSION.SDK_INT >= 33 &&
+            !checkPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        ) {
+            permissionLauncherCompat.launch(Manifest.permission.POST_NOTIFICATIONS) { granted ->
+                refreshNotificationPermissionPreference()
+                if (!granted) {
+                    NetSpeedNotificationHelper.goNotificationSetting(context)
+                } else if (NetSpeedPreferences.status || statusSwitchPreference.isChecked) {
+                    // Permission just granted while service was intended on
+                    controller.startService(true)
+                    miuiNotificationAlert()
+                }
+            }
+            return
+        }
+        NetSpeedNotificationHelper.goNotificationSetting(context)
+    }
+
+    // TEMP_NOTIFY_PERM: update summary / visibility for the permission preference
+    private fun refreshNotificationPermissionPreference() {
+        if (!::notificationPermissionPreference.isInitialized) return
+        val ok = NetSpeedNotificationHelper.canPostNotifications(requireContext())
+        notificationPermissionPreference.summary =
+            if (ok) {
+                getString(R.string.summary_notification_permission_granted)
+            } else {
+                getString(R.string.summary_notification_permission_denied)
+            }
     }
 
     override fun onPreferenceChange(preference: Preference, newValue: Any): Boolean {
@@ -190,8 +254,12 @@ class NetSpeedFragment :
             NetSpeedPreferences.KEY_NET_SPEED_STATUS -> {
                 val status = newValue as Boolean
                 if (status) {
+                    // Defer switch persistence until permission is granted (see startService)
                     startService()
-                } else controller.stopService()
+                    return false
+                } else {
+                    controller.stopService()
+                }
             }
             NetSpeedPreferences.KEY_NET_SPEED_INTERVAL -> {
                 configuration.interval = (newValue as String).toInt()
@@ -241,6 +309,11 @@ class NetSpeedFragment :
         }
         controller.updateConfiguration(configuration)
         return true
+    }
+
+    override fun onStart() {
+        super.onStart()
+        refreshNotificationPermissionPreference()
     }
 
     override fun onDestroyView() {

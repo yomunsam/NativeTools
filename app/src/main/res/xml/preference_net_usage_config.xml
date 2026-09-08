@@ -10,33 +10,20 @@
 
     <SwitchPreferenceCompat
         app:defaultValue="false"
-        app:disableDependentsState="false"
         app:iconSpaceReserved="false"
         app:key="key_net_usage_mobile"
         app:title="@string/label_mobile" />
 
-    <PreferenceCategory
-        app:dependency="key_net_usage_mobile"
-        app:iconSpaceReserved="false"
-        app:key="key_imsi_config_group"
-        app:persistent="false"
-        app:title="@string/label_sim_card_config">
-
-    </PreferenceCategory>
-
-    <app.yomu.netbar.ui.MaterialEditTextPreference
-        android:inputType="text"
-        app:allowDividerAbove="true"
-        app:dependency="key_net_usage_mobile"
-        app:dialogMessage="@string/alert_msg_add_imsi_config"
-        app:dialogTitle="@string/label_sim_card_config"
-        app:icon="@drawable/ic_outline_add"
-        app:key="key_add_imsi_config"
-        app:persistent="false"
-        app:title="@string/label_add" />
-
     <Preference
-        app:dependency="key_net_usage_mobile"
+        app:icon="@drawable/ic_round_settings"
         app:iconSpaceReserved="false"
-        app:summary="@string/label_imsi_config_tip" />
+        app:key="key_usage_access"
+        app:persistent="false"
+        app:title="@string/usage_states_title" />
+
+    <!-- TEMP_OEM_IMSI: IMSI hand-entry removed; tip explains aggregated mobile stats. -->
+    <Preference
+        app:iconSpaceReserved="false"
+        app:selectable="false"
+        app:summary="@string/label_net_usage_config_tip" />
 </PreferenceScreen>

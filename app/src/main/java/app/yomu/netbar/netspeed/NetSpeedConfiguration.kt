@@ -3,7 +3,6 @@ package app.yomu.netbar.netspeed
 import android.os.Parcelable
 import androidx.annotation.FloatRange
 import androidx.datastore.preferences.core.Preferences
-import app.yomu.netbar.NativeToolsApp
 import app.yomu.netbar.netspeed.utils.NetFormatter
 import app.yomu.netbar.netusage.NetUsageConfigs
 import app.yomu.netbar.util.get
@@ -32,7 +31,8 @@ constructor(
     @FloatRange(from = -0.5, to = 0.5) var relativeDistance: Float = 0.15f, // 相对距离
     @FloatRange(from = 0.1, to = 1.5) var textScale: Float = 1f, // 字体缩放
     @FloatRange(from = 0.2, to = 1.3) var horizontalScale: Float = 1f, // X轴缩放
-    var imsiSet: Set<String>? = null, // 配置的IMSI
+    // TEMP_OEM_IMSI: parcel field kept; live path uses null (device-wide mobile bucket).
+    var imsiSet: Set<String>? = null,
     @IgnoredOnParcel var isPowerSaveMode: Boolean = false // 省电模式
 ) : Parcelable {
 
@@ -63,6 +63,7 @@ constructor(
         return this
     }
 
+    /** TEMP_OEM_IMSI: kept for IPC; pass null from UI. */
     fun updateImsi(imsiSet: Set<String>?): NetSpeedConfiguration {
         this.imsiSet = imsiSet
         return this
@@ -182,8 +183,8 @@ constructor(
                 defaultConfiguration.hideLockNotification
             )
 
-        // 获取已经启用的imsi
-        this.imsiSet = NetUsageConfigs(NativeToolsApp.getInstance()).getEnabledIMSI()
+        // TEMP_OEM_IMSI: do not load hand-entered IMSI; NetworkStatsManager uses null subscriberId.
+        this.imsiSet = null
 
         return this
     }

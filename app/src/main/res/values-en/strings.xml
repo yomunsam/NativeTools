@@ -51,6 +51,10 @@
     <string name="label_coffee">Buy me a cup of coffee?</string>
     <string name="label_ignore_battery_optimize">Ignore battery optimization</string>
     <string name="summary_ignore_battery_optimize">Add battery optimization whitelist to prevent foreground service failure (for some devices)</string>
+    <string name="label_notification_permission">Notification permission</string>
+    <string name="summary_notification_permission">Required to show the net speed notification. If denied, open system settings to enable it</string>
+    <string name="summary_notification_permission_granted">Enabled — tap to manage notification settings</string>
+    <string name="summary_notification_permission_denied">Not enabled — tap to request or open settings</string>
     <string name="toast_saved">Saved</string>
     <string name="label_home">Home</string>
     <string name="toast_open_battery_optimization">Please find the \"Net Monitor\" and turn on battery optimization manually</string>
@@ -83,6 +87,9 @@
     <string name="label_net_speed_silence_channel">Silent notification</string>
     <string name="label_net_speed_default_channel">Event notification</string>
     <string name="alert_msg_hide_threshold">Hide the network speed icon when the speed is less than the specified value (unit B, 1024b = 1KB)</string>
+    <string name="label_net_usage_config_tip">Mobile usage is aggregated for the device; IMSI entry is not required. Usage display needs Usage Access permission; without it values stay empty/zero.</string>
+    <string name="summary_usage_access_granted">Usage access granted</string>
+    <string name="summary_usage_access_denied">Not granted — tap to open system settings</string>
     <string name="label_net_usage_config">网络使用情况配置</string>
     <string name="label_imsi_config_tip">If you use multiple SIM cards, you can configure the IMSI information for each SIM card separately to display detailed mobile traffic information. IMSI information can be viewed by entering *#*#4636#*#* in the dial.</string>
     <string name="alert_msg_add_imsi_config">Enter the IMSI of your SIM card</string>

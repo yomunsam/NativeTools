@@ -1,8 +1,6 @@
 rootProject.name = "NativeTools"
 include(":app")
 
-enableFeaturePreview("VERSION_CATALOGS")
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
