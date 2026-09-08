@@ -17,8 +17,6 @@ import app.yomu.netbar.netspeed.NetSpeedPreferences
 import app.yomu.netbar.util.alert
 import app.yomu.netbar.util.browse
 import app.yomu.netbar.util.color
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 
 class GuideDialogFragment : DialogFragment() {
 
@@ -43,7 +41,8 @@ class GuideDialogFragment : DialogFragment() {
             setMessage(span)
             negativeButton(android.R.string.cancel) { requireActivity().finish() }
             positiveButton(android.R.string.ok) {
-                Firebase.analytics.setAnalyticsCollectionEnabled(true)
+                // TEMP_TELEMETRY_OFF: keep Analytics off by default for this fork
+                // Firebase.analytics.setAnalyticsCollectionEnabled(true)
                 NetSpeedPreferences.privacyAgreed = true
             }
         }

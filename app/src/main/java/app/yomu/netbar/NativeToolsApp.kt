@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
-import app.yomu.netbar.netspeed.NetSpeedPreferences
 import app.yomu.netbar.other.OtherPreferences
 import app.yomu.netbar.util.installShortcuts
 import app.yomu.netbar.util.isMainProcess
@@ -14,7 +13,9 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.perf.ktx.performance
 import me.weishu.reflection.Reflection
 
 class NativeToolsApp : Application() {
@@ -63,9 +64,11 @@ class NativeToolsApp : Application() {
         } else {
             Log.i(TAG, "FirebaseApp initialization successful")
         }
-        if (NetSpeedPreferences.privacyAgreed) {
-            Firebase.analytics.setAnalyticsCollectionEnabled(true)
-        }
+        // TEMP_TELEMETRY_OFF: fork default — Analytics / Crashlytics / Perf collection disabled.
+        // Keep APIs so collection can be re-enabled later if needed.
+        Firebase.analytics.setAnalyticsCollectionEnabled(false)
+        Firebase.crashlytics.setCrashlyticsCollectionEnabled(false)
+        Firebase.performance.isPerformanceCollectionEnabled = false
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

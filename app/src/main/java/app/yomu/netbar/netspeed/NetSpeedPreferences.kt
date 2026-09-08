@@ -38,6 +38,7 @@ object NetSpeedPreferences {
     private const val KEY_NOTIFICATION_DONT_ASK = "notification_dont_ask"
     private const val KEY_PRIVACY_AGREED = "privacy_agreed"
     private const val KEY_MIUI_ALERTED = "miui_alerted"
+    private const val KEY_SETUP_CHECKLIST_DISMISSED = "setup_checklist_dismissed"
 
     const val DEFAULT_INTERVAL = 1000
     const val DEFAULT_TEXT_STYLE = Typeface.BOLD
@@ -64,4 +65,9 @@ object NetSpeedPreferences {
     var miuiAlerted: Boolean
         get() = globalDataStore.get(booleanPreferencesKey(KEY_MIUI_ALERTED), false)
         set(value) = globalDataStore.set(booleanPreferencesKey(KEY_MIUI_ALERTED), value)
+
+    /** TEMP_SETUP: first-run checklist dismissed / completed */
+    var setupChecklistDismissed: Boolean
+        get() = globalDataStore.get(booleanPreferencesKey(KEY_SETUP_CHECKLIST_DISMISSED), false)
+        set(value) = globalDataStore.set(booleanPreferencesKey(KEY_SETUP_CHECKLIST_DISMISSED), value)
 }

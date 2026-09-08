@@ -17,6 +17,14 @@
             app:defaultValue="false"
             app:icon="@drawable/ic_launcher_icon" />
 
+        <!-- TEMP_SETUP: reopen first-run checklist -->
+        <Preference
+            app:icon="@drawable/ic_outline_list_check"
+            app:key="setup_checklist"
+            app:persistent="false"
+            app:summary="@string/summary_open_setup_checklist"
+            app:title="@string/label_open_setup_checklist" />
+
         <DropDownPreference
             android:key="net_speed_interval"
             app:defaultValue="1000"

@@ -115,4 +115,18 @@
     <string name="summary_get_beta">获取应用的内测版本</string>
     <string name="label_add">添加</string>
     <string name="label_power_save_mode">省电模式</string>
+
+    <string name="label_setup_checklist">首次设置</string>
+    <string name="summary_setup_checklist">完成以下步骤，网速指示器才能稳定显示。使用情况访问为可选，仅在需要流量统计时开启。</string>
+    <string name="label_setup_step_notification">1. 通知权限（必需）</string>
+    <string name="label_setup_step_battery">2. 忽略电池优化（推荐）</string>
+    <string name="label_setup_step_usage">3. 使用情况访问（可选）</string>
+    <string name="setup_status_done">已完成</string>
+    <string name="setup_status_todo">未完成，点击上方按钮去开启</string>
+    <string name="setup_status_optional_todo">未开启（可选，流量统计需要）</string>
+    <string name="action_setup_later">稍后再说</string>
+    <string name="action_setup_done">完成</string>
+    <string name="label_open_setup_checklist">首次设置向导</string>
+    <string name="summary_open_setup_checklist">通知权限、电池优化、使用情况访问</string>
+
 </resources>

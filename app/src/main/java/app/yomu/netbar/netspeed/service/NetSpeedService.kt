@@ -31,6 +31,8 @@ class NetSpeedService : Service(), Runnable {
     companion object {
         private const val DELAY_BLANK_NOTIFICATION_ICON = 3000L
         const val INTERVAL_POWER_SAVE_MODE = 5000L
+        // TEMP_POWER: screen-off sampling throttle (regardless of user preference)
+        const val INTERVAL_SCREEN_OFF = 4000L
 
         const val ACTION_CLOSE = "app.yomu.netbar.CLOSE"
 
@@ -66,6 +68,9 @@ class NetSpeedService : Service(), Runnable {
 
     private val showBlankNotificationRunnable = this
 
+    // TEMP_POWER: track screen state for interval throttle (ticker keeps running)
+    @Volatile private var isScreenOff: Boolean = false
+
     override fun run() {
         // 显示透明图标通知
         configuration.showBlankNotification = true
@@ -79,7 +84,7 @@ class NetSpeedService : Service(), Runnable {
 
     private val netSpeedCompute = NetSpeedCompute { rxSpeed, txSpeed ->
         if (!powerManager.isInteractive) {
-            // ACTION_SCREEN_OFF广播有一定的延迟，所以设备不可交互时不处理
+            // ACTION_SCREEN_OFF广播有一定的延迟，所以设备不可交互时不处理通知刷新
             return@NetSpeedCompute
         }
 
@@ -117,6 +122,7 @@ class NetSpeedService : Service(), Runnable {
     override fun onCreate() {
         super.onCreate()
         configuration.isPowerSaveMode = powerManager.isPowerSaveMode
+        isScreenOff = !powerManager.isInteractive
         NetSpeedNotificationHelper.startForeground(this, configuration)
 
         broadcastHelper.register(this) { action: String?, _ ->
@@ -130,15 +136,28 @@ class NetSpeedService : Service(), Runnable {
                 }
                 Intent.ACTION_SCREEN_ON -> {
                     track("网速服务广播亮屏恢复") {
-                        resume() // 直接更新指示器
+                        // TEMP_POWER: restore configured / power-save interval
+                        isScreenOff = false
+                        applySamplingInterval()
+                        // 直接更新指示器（采样未停，强制刷一次通知）
+                        NetSpeedNotificationHelper.invalidateDirtyCache()
+                        NetSpeedNotificationHelper.notification(
+                            this,
+                            configuration,
+                            netSpeedCompute.rxSpeed,
+                            netSpeedCompute.txSpeed
+                        )
                     }
                 }
                 Intent.ACTION_SCREEN_OFF -> {
-                    pause() // 关闭屏幕时显示，只保留服务保活
+                    // TEMP_POWER: keep sampling, temporarily lower interval (do not pause)
+                    isScreenOff = true
+                    applySamplingInterval()
                 }
             }
         }
 
+        applySamplingInterval()
         resume()
     }
 
@@ -147,23 +166,24 @@ class NetSpeedService : Service(), Runnable {
         netSpeedCompute.start()
     }
 
-    /** 暂停指示器 */
-    private fun pause() {
-        netSpeedCompute.stop()
+    /** TEMP_POWER: screen-off 3–5s throttle > power-save 5s > user preference */
+    private fun applySamplingInterval() {
+        val interval =
+            when {
+                isScreenOff -> INTERVAL_SCREEN_OFF.toInt()
+                configuration.isPowerSaveMode -> INTERVAL_POWER_SAVE_MODE.toInt()
+                else -> configuration.interval
+            }
+        netSpeedCompute.interval = interval
     }
 
     private fun updateConfiguration(configuration: NetSpeedConfiguration?) {
         if (configuration == null || configuration == this.configuration) {
             return
         }
-        this.configuration.updateFrom(configuration).also {
-            if (it.isPowerSaveMode) {
-                // 省电模式下延长刷新间隔
-                netSpeedCompute.interval = INTERVAL_POWER_SAVE_MODE.toInt()
-            } else {
-                netSpeedCompute.interval = it.interval
-            }
-        }
+        this.configuration.updateFrom(configuration)
+        applySamplingInterval()
+        NetSpeedNotificationHelper.invalidateDirtyCache()
         NetSpeedNotificationHelper.notification(
             this,
             this.configuration,
@@ -189,6 +209,7 @@ class NetSpeedService : Service(), Runnable {
     override fun onDestroy() {
         lifecycleJob.cancel()
         netSpeedCompute.destroy()
+        NetSpeedNotificationHelper.invalidateDirtyCache()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {

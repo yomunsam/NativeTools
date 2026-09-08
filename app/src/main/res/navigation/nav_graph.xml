@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_netSpeed_to_netUsageConfigFragment"
             app:destination="@id/netUsageConfigFragment" />
+        <action
+            android:id="@+id/action_netSpeed_to_dialogSetupChecklist"
+            app:destination="@id/dialogSetupChecklist" />
     </fragment>
 
     <fragment
@@ -90,6 +93,12 @@
         android:id="@+id/dialogGuide"
         android:name="app.yomu.netbar.main.GuideDialogFragment"
         android:label="@string/label_privacy_agreement" />
+
+    <dialog
+        android:id="@+id/dialogSetupChecklist"
+        android:name="app.yomu.netbar.main.SetupChecklistDialogFragment"
+        android:label="@string/label_setup_checklist"
+        tools:layout="@layout/dialog_setup_checklist" />
 
     <dialog
         android:id="@+id/dialogBeta"

@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationChannelCompat
@@ -35,6 +36,12 @@ object NetSpeedNotificationHelper {
 
     private const val CHANNEL_ID_DEFAULT = "net_speed_channel_default"
     private const val CHANNEL_ID_SILENCE = "net_speed_channel_silence"
+
+    // TEMP_POWER: dirty notification — skip notify when text + icon unchanged
+    @Volatile private var lastContentTitle: String? = null
+    @Volatile private var lastContentText: String? = null
+    @Volatile private var lastSilence: Boolean? = null
+    @Volatile private var lastIconBitmap: Bitmap? = null
 
     private fun isSecure(context: Context): Boolean {
         val keyguardManager = context.requireSystemService<KeyguardManager>()
@@ -194,21 +201,93 @@ object NetSpeedNotificationHelper {
         )
     }
 
+    /** TEMP_POWER: drop cached icon / text so the next notify posts. */
+    fun invalidateDirtyCache() {
+        val old = lastIconBitmap
+        lastIconBitmap = null
+        lastContentTitle = null
+        lastContentText = null
+        lastSilence = null
+        BitmapPoolAccessor.recycle(old)
+    }
+
     fun notification(
         context: Context,
         configuration: NetSpeedConfiguration,
         rxSpeed: Long,
         txSpeed: Long,
     ) {
-        val smileIcon = createSmileIcon(configuration, rxSpeed, txSpeed)
-        val notification = createNotification(context, configuration, smileIcon, rxSpeed, txSpeed)
+        val silence = configuration.showBlankNotification
+        val downloadSpeedStr: String =
+            NetFormatter.format(rxSpeed, NetFormatter.FLAG_FULL, NetFormatter.ACCURACY_EXACT)
+                .splicing()
+        val uploadSpeedStr: String =
+            NetFormatter.format(txSpeed, NetFormatter.FLAG_FULL, NetFormatter.ACCURACY_EXACT)
+                .splicing()
+        val contentTitle =
+            context.getString(R.string.notify_net_speed_msg, uploadSpeedStr, downloadSpeedStr)
+        val contentText =
+            if (configuration.usage) getUsageText(context, configuration) else null
+
+        val iconBitmap =
+            if (configuration.showBlankNotification) {
+                NetTextIconFactory.createBlank()
+            } else {
+                NetTextIconFactory.create(rxSpeed, txSpeed, configuration)
+            }
+
+        // TEMP_POWER: skip NotificationManager.notify when content unchanged
+        val lastBitmap = lastIconBitmap
+        if (
+            lastSilence == silence &&
+                lastContentTitle == contentTitle &&
+                lastContentText == contentText &&
+                lastBitmap != null &&
+                lastBitmap.sameAs(iconBitmap)
+        ) {
+            BitmapPoolAccessor.recycle(iconBitmap)
+            return
+        }
+
+        val smileIcon = IconCompat.createWithBitmap(iconBitmap)
+        val notification =
+            createNotification(
+                context,
+                configuration,
+                smileIcon,
+                contentTitle,
+                contentText,
+            )
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
-        BitmapPoolAccessor.recycle(smileIcon.bitmap)
+
+        lastContentTitle = contentTitle
+        lastContentText = contentText
+        lastSilence = silence
+        lastIconBitmap = iconBitmap
+        if (lastBitmap !== iconBitmap) {
+            BitmapPoolAccessor.recycle(lastBitmap)
+        }
     }
 
     fun startForeground(context: Service, configuration: NetSpeedConfiguration) {
-        val smileIcon = createSmileIcon(configuration, 0, 0)
-        val notification = createNotification(context, configuration, smileIcon, 0, 0)
+        invalidateDirtyCache()
+        val iconBitmap =
+            if (configuration.showBlankNotification) {
+                NetTextIconFactory.createBlank()
+            } else {
+                NetTextIconFactory.create(0, 0, configuration)
+            }
+        val smileIcon = IconCompat.createWithBitmap(iconBitmap)
+        val downloadSpeedStr: String =
+            NetFormatter.format(0, NetFormatter.FLAG_FULL, NetFormatter.ACCURACY_EXACT).splicing()
+        val uploadSpeedStr: String =
+            NetFormatter.format(0, NetFormatter.FLAG_FULL, NetFormatter.ACCURACY_EXACT).splicing()
+        val contentTitle =
+            context.getString(R.string.notify_net_speed_msg, uploadSpeedStr, downloadSpeedStr)
+        val contentText =
+            if (configuration.usage) getUsageText(context, configuration) else null
+        val notification =
+            createNotification(context, configuration, smileIcon, contentTitle, contentText)
         // API 34+: pass FGS type matching the manifest specialUse declaration.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             context.startForeground(
@@ -219,7 +298,11 @@ object NetSpeedNotificationHelper {
         } else {
             context.startForeground(NOTIFICATION_ID, notification)
         }
-        BitmapPoolAccessor.recycle(smileIcon.bitmap)
+        // Cache posted content; keep bitmap until next dirty update recycles it
+        lastContentTitle = contentTitle
+        lastContentText = contentText
+        lastSilence = configuration.showBlankNotification
+        lastIconBitmap = iconBitmap
     }
 
     private fun createSmileIcon(
@@ -242,15 +325,15 @@ object NetSpeedNotificationHelper {
      * @param context 上下文
      * @param configuration 配置
      * @param smileIcon 小图标
-     * @param rxSpeed 下行网速
-     * @param txSpeed 上行网速
+     * @param contentTitle 标题（上传/下载速度文案）
+     * @param contentText 副标题（流量使用，可空）
      */
     private fun createNotification(
         context: Context,
         configuration: NetSpeedConfiguration,
         smileIcon: IconCompat,
-        rxSpeed: Long = 0L,
-        txSpeed: Long = 0L,
+        contentTitle: String,
+        contentText: String?,
     ): Notification {
         val silence = configuration.showBlankNotification
         createChannels(context, silence)
@@ -291,26 +374,17 @@ object NetSpeedNotificationHelper {
             pendingFlag = pendingFlag or PendingIntent.FLAG_IMMUTABLE
         }
 
-        val downloadSpeedStr: String =
-            NetFormatter.format(rxSpeed, NetFormatter.FLAG_FULL, NetFormatter.ACCURACY_EXACT)
-                .splicing()
-        val uploadSpeedStr: String =
-            NetFormatter.format(txSpeed, NetFormatter.FLAG_FULL, NetFormatter.ACCURACY_EXACT)
-                .splicing()
-        val contentStr =
-            context.getString(R.string.notify_net_speed_msg, uploadSpeedStr, downloadSpeedStr)
-        builder.setContentTitle(contentStr)
+        builder.setContentTitle(contentTitle)
 
         if (configuration.usage) {
-            val usageText = getUsageText(context, configuration)
-            builder.setContentText(usageText)
+            builder.setContentText(contentText)
             // big text
-            if (usageText != null && usageText.lines().size > 1) {
+            if (contentText != null && contentText.lines().size > 1) {
                 // 多行文字
                 val bigTextStyle =
                     NotificationCompat.BigTextStyle()
-                        .setBigContentTitle(contentStr)
-                        .bigText(usageText)
+                        .setBigContentTitle(contentTitle)
+                        .bigText(contentText)
                 builder.setStyle(bigTextStyle)
             }
         }

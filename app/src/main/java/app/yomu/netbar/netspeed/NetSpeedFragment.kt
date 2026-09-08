@@ -90,11 +90,31 @@ class NetSpeedFragment :
                 }
             }
         }
+
+        maybeShowSetupChecklist()
+    }
+
+    /** TEMP_SETUP: first-run checklist after privacy agreement */
+    private fun maybeShowSetupChecklist() {
+        if (!NetSpeedPreferences.privacyAgreed) return
+        if (NetSpeedPreferences.setupChecklistDismissed) return
+        // Avoid stacking over privacy dialog if still navigating
+        if (findNavController().currentDestination?.id != R.id.netSpeed) return
+        findNavController().navigate(R.id.action_netSpeed_to_dialogSetupChecklist)
+    }
+
+    private fun openSetupChecklist() {
+        findNavController().navigate(R.id.action_netSpeed_to_dialogSetupChecklist)
     }
 
     private fun initGeneralPreferenceGroup() {
         statusSwitchPreference = requirePreference(NetSpeedPreferences.KEY_NET_SPEED_STATUS)
         statusSwitchPreference.onPreferenceChangeListener = this
+
+        // TEMP_SETUP
+        requirePreference<Preference>("setup_checklist").onPreferenceClickListener {
+            openSetupChecklist()
+        }
 
         thresholdEditTextPreference =
             requirePreference<EditTextPreference>(NetSpeedPreferences.KEY_NET_SPEED_HIDE_THRESHOLD)
@@ -187,6 +207,9 @@ class NetSpeedFragment :
                 checkNotificationEnable()
             }
             refreshNotificationPermissionPreference()
+            if (!NetSpeedPreferences.setupChecklistDismissed) {
+                maybeShowSetupChecklist()
+            }
         }
 
         // TEMP_NOTIFY_PERM: API 33+ must have POST_NOTIFICATIONS before FGS notification can show
@@ -314,6 +337,8 @@ class NetSpeedFragment :
     override fun onStart() {
         super.onStart()
         refreshNotificationPermissionPreference()
+        // TEMP_SETUP: after privacy dialog dismisses, surface checklist once
+        maybeShowSetupChecklist()
     }
 
     override fun onDestroyView() {
